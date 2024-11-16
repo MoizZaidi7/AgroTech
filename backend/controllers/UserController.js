@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
-import sendEmail from '../utils/sendemail.js';
+import {sendEmail} from '../utils/sendEmail.js';
 import crypto from 'crypto';
 
   const forgotPassword = async (req, res) => {
@@ -98,7 +98,7 @@ const changePassword = async(req, res) => {
   };
 
   // Delete user account
-const deleteUser = async (req, res) => {
+const deleteUserAccount = async (req, res) => {
   try {
       await User.findByIdAndDelete(req.user.id);
       res.status(200).json({ message: 'User account deleted successfully' });
@@ -110,6 +110,4 @@ const deleteUser = async (req, res) => {
 
 
 
-
-
-  export {forgotPassword, resetPassword, updateProfile, changePassword, deleteUser};
+  export {forgotPassword, resetPassword, updateProfile, changePassword, deleteUserAccount};
