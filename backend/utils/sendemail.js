@@ -14,7 +14,7 @@ const sendEmail = async ({ email, subject, htmlMessage }) => {
         });
 
         const mailOptions = {
-            from: process.env.EMAIL_USER,
+            from: `"AgroTech Support" <${process.env.EMAIL_USER}>`,
             to: email,
             subject: subject,
             html: htmlMessage,

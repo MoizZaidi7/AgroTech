@@ -2,9 +2,10 @@ import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
 import {sendEmail} from '../utils/sendEmail.js';
 import crypto from 'crypto';
+import generatePasswordResetEmail from '../utils/emailTemplates.js';
 
   const forgotPassword = async (req, res) => {
-    const { email } = req.body;
+    const { email  } = req.body;
 
     try {
         const user = await User.findOne({ email });
@@ -16,10 +17,15 @@ import crypto from 'crypto';
         await user.save();
 
         const resetUrl = `${req.protocol}://${req.get('host')}/api/users/resetPassword/${resetToken}`;
-        const message = `You requested a password reset. Click here to reset: ${resetUrl}`;
+        const emailcontent = generatePasswordResetEmail(user.username, resetUrl);
+        console.log(emailcontent);
 
         try {
-            await sendEmail({ email: user.email, subject: 'Password Reset', message });
+            await sendEmail({
+                email: user.email,
+                subject: 'Password Reset',
+                htmlMessage: emailcontent
+            });
             res.status(200).json({ message: 'Reset email sent successfully' });
         } catch (emailError) {
             user.resetPasswordToken = undefined;
@@ -31,7 +37,6 @@ import crypto from 'crypto';
         res.status(500).json({ message: 'Error processing request', error });
     }
 };
-
     // Reset Password
     const resetPassword = async (req, res) => {
     const { token } = req.params;

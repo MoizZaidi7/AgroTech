@@ -1,9 +1,11 @@
-import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import User from '../models/User.js';
 import { sendEmail } from '../utils/sendEmail.js';
 import { generateOTP } from '../utils/otpGenerator.js';
-
+import  generateToken  from '../utils/generate.js';
+import { generateOtpEmail, generateWelcomeEmail} from '../utils/emailTemplates.js';
+// Register a new user
 const registerUser = async (req, res) => {
     const { username, email, password, userType, otp } = req.body;
 
@@ -12,6 +14,12 @@ const registerUser = async (req, res) => {
         if (otp) {
             const user = await User.findOne({ email });
             if (!user) return res.status(404).json({ message: 'User not found' });
+
+        // Check if OTP is expired
+        if (user.resetPasswordExpire < Date.now()) {
+            await User.findByIdAndDelete(user._id); // Delete expired user
+            return res.status(400).json({ message: 'OTP expired. Please register again.' });
+        } 
 
             const hashedOtp = crypto.createHash('sha256').update(otp.toString()).digest('hex');
             if (user.resetPasswordToken !== hashedOtp || user.resetPasswordExpire < Date.now()) {
@@ -25,16 +33,7 @@ const registerUser = async (req, res) => {
             await user.save();
 
             // Send Welcome Email
-            const welcomeMessage = `
-                <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-                    <h2 style="color: #4CAF50;">Welcome to AgroTech!</h2>
-                    <p>Hello <strong>${user.username}</strong>,</p>
-                    <p>We're excited to have you on board! You now have access to all the features of AgroTech.</p>
-                    <p>Feel free to explore and let us know if you have any questions.</p>
-                    <p>Happy farming,</p>
-                    <p><strong>The AgroTech Team</strong></p>
-                </div>
-            `;
+            const welcomeMessage = generateWelcomeEmail(user.username);
 
             await sendEmail({
                 email: user.email,
@@ -73,17 +72,7 @@ const registerUser = async (req, res) => {
         await newUser.save();
 
         // Send OTP via email
-        const otpMessage = `
-            <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-                <h2>Your OTP Code</h2>
-                <p>Hello <strong>${username}</strong>,</p>
-                <p>Thank you for signing up for AgroTech. To activate your account, please use the following OTP:</p>
-                <h3 style="color: #4CAF50;">${otpCode}</h3>
-                <p>This OTP is valid for 10 minutes.</p>
-                <p>Best regards,</p>
-                <p><strong>The AgroTech Team</strong></p>
-            </div>
-        `;
+        const otpMessage = generateOtpEmail(username, otpCode);
 
         await sendEmail({
             email,
@@ -98,29 +87,38 @@ const registerUser = async (req, res) => {
     }
 };
 
-  
-  // Login an existing user
-  const loginUser = async (req, res) => {
+// Login an existing user
+const loginUser = async (req, res) => {
     const { email, password, rememberMe } = req.body;
-  
+
     try {
-      // Find the user by email
-      const user = await User.findOne({ email });
-      if (!user) return res.status(404).json({ message: 'User not found' });
-  
-      // Check if the password is valid
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) return res.status(400).json({ message: 'Invalid credentials' });
-  
-      // Generate JWT token
-      const expiresIn = rememberMe ? '7d' : '1h';
-      const token = generateToken(user._id, expiresIn);
-  
-      // Return the logged-in user and token
-      res.status(200).json({ user, token });
+        // Find the user by email
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        // Ensure the account is active
+        if (!user.isActive) {
+            return res.status(403).json({ message: 'Account is not active. Please verify your email.' });
+        }
+
+        // Check if the password is valid
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) return res.status(400).json({ message: 'Invalid credentials' });
+
+        // Generate JWT token with conditional expiration
+        const expiresIn = rememberMe ? '7d' : '1h';
+        const token = generateToken(user._id, expiresIn);
+
+        // Return the logged-in user and token
+        res.status(200).json({
+            message: 'Login successful',
+            user: { username: user.username, email: user.email, userType: user.userType },
+            token,
+        });
     } catch (error) {
-      res.status(500).json({ message: 'Error logging in', error });
+        console.error('Error logging in:', error);
+        res.status(500).json({ message: 'Error logging in', error });
     }
-  };
-  
-  export {loginUser, registerUser};
+};
+
+export { loginUser, registerUser };
