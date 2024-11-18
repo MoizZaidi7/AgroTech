@@ -1,32 +1,33 @@
 import bcrypt from 'bcryptjs';
-import crypto from 'crypto';
 import User from '../models/User.js';
-import { sendEmail } from '../utils/sendEmail.js';
+import { validatePassword } from '../utils/validatePassword.js';
 import { generateOTP } from '../utils/otpGenerator.js';
-import  generateToken  from '../utils/generate.js';
-import { generateOtpEmail, generateWelcomeEmail} from '../utils/emailTemplates.js';
-// Register a new user
+import { hashOTP } from '../utils/hashotp.js';
+import generateToken from '../utils/generateToken.js';
+import { sendEmail  } from '../utils/sendEmail.js';
+import { generateWelcomeEmail, generateOtpEmail } from '../utils/emailTemplates.js';
+
 const registerUser = async (req, res) => {
     const { username, email, password, userType, otp } = req.body;
 
     try {
-        // If OTP is provided, verify the OTP
+        // OTP Verification Flow
         if (otp) {
             const user = await User.findOne({ email });
             if (!user) return res.status(404).json({ message: 'User not found' });
 
-        // Check if OTP is expired
-        if (user.resetPasswordExpire < Date.now()) {
-            await User.findByIdAndDelete(user._id); // Delete expired user
-            return res.status(400).json({ message: 'OTP expired. Please register again.' });
-        } 
-
-            const hashedOtp = crypto.createHash('sha256').update(otp.toString()).digest('hex');
-            if (user.resetPasswordToken !== hashedOtp || user.resetPasswordExpire < Date.now()) {
-                return res.status(400).json({ message: 'Invalid or expired OTP' });
+            // Check if OTP is expired
+            if (user.resetPasswordExpire < Date.now()) {
+                await User.findByIdAndDelete(user._id); // Delete expired user
+                return res.status(400).json({ message: 'OTP expired. Please register again.' });
             }
 
-            // Clear OTP fields and activate the user
+            const hashedOtp = hashOTP(otp);
+            if (user.resetPasswordToken !== hashedOtp) {
+                return res.status(400).json({ message: 'Invalid OTP. Please try again.' });
+            }
+
+            // Activate the user account
             user.resetPasswordToken = undefined;
             user.resetPasswordExpire = undefined;
             user.isActive = true;
@@ -34,7 +35,6 @@ const registerUser = async (req, res) => {
 
             // Send Welcome Email
             const welcomeMessage = generateWelcomeEmail(user.username);
-
             await sendEmail({
                 email: user.email,
                 subject: 'Welcome to AgroTech!',
@@ -44,7 +44,8 @@ const registerUser = async (req, res) => {
             return res.status(200).json({ message: 'Account activated successfully. Welcome email sent.' });
         }
 
-        // For new registration, check if the user already exists
+        // Registration Flow
+        // Check if the user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) return res.status(400).json({ message: 'User already exists' });
 
@@ -54,10 +55,16 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: 'Invalid user type' });
         }
 
-        // Hash the password
+        // Validate password
+        const { isValid, message } = validatePassword(password);
+        if (!isValid) {
+            return res.status(400).json({ message });
+        }
+
+        // Hash the password and generate OTP
         const hashedPassword = await bcrypt.hash(password, 10);
         const otpCode = generateOTP();
-        const hashedOtp = crypto.createHash('sha256').update(otpCode.toString()).digest('hex');
+        const hashedOtp = hashOTP(otpCode);
 
         const newUser = new User({
             username,
@@ -73,7 +80,6 @@ const registerUser = async (req, res) => {
 
         // Send OTP via email
         const otpMessage = generateOtpEmail(username, otpCode);
-
         await sendEmail({
             email,
             subject: 'Activate Your AgroTech Account',
@@ -86,6 +92,9 @@ const registerUser = async (req, res) => {
         res.status(500).json({ message: 'Error registering user', error });
     }
 };
+
+export default registerUser;
+
 
 // Login an existing user
 const loginUser = async (req, res) => {
@@ -113,7 +122,7 @@ const loginUser = async (req, res) => {
         res.status(200).json({
             message: 'Login successful',
             user: { username: user.username, email: user.email, userType: user.userType },
-            token,
+            token, expiresIn
         });
     } catch (error) {
         console.error('Error logging in:', error);
