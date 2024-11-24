@@ -1,6 +1,6 @@
 import express from 'express';
 import {forgotPassword, resetPassword, changePassword, updateProfile, deleteUserAccount} from '../controllers/UserController.js';
-import { loginUser, registerUser } from '../controllers/AuthController.js';
+import { loginUser, logoutUser, registerUser} from '../controllers/AuthController.js';
 import authMiddleware  from '../middleware/authMiddleware.js';
 
 const userRouter = express.Router();
@@ -13,6 +13,8 @@ userRouter.put('/resetPassword/:token', resetPassword);  //Reset Password
 userRouter.put('/changePassword', authMiddleware, changePassword); //Change Password
 userRouter.put('/profile', authMiddleware, updateProfile); //Update Profile
 userRouter.delete('/delete', authMiddleware, deleteUserAccount); //Delete User
+userRouter.post('/logout', authMiddleware, logoutUser);
+
 
 
 export default userRouter;

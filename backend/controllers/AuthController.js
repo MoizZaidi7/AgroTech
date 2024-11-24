@@ -110,6 +110,12 @@ const loginUser = async (req, res) => {
             return res.status(403).json({ message: 'Account is not active. Please verify your email.' });
         }
 
+        // Check if the user is already logged in
+        if (user.isLoggedIn) {
+            console.error('User already logged in:', email);
+            return res.status(400).json({ message: 'User is already logged in. Please log out first.' });
+        }
+
         // Check if the password is valid
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) return res.status(400).json({ message: 'Invalid credentials' });
@@ -117,6 +123,12 @@ const loginUser = async (req, res) => {
         // Generate JWT token with conditional expiration
         const expiresIn = rememberMe ? '7d' : '1h';
         const token = generateToken(user._id, expiresIn);
+
+         // Update the isLoggedIn status
+         console.log(user);
+         user.isLoggedIn = true;
+         await user.save();
+         console.log(user);
 
         // Return the logged-in user and token
         res.status(200).json({
@@ -130,4 +142,33 @@ const loginUser = async (req, res) => {
     }
 };
 
-export { loginUser, registerUser };
+const logoutUser = async (req, res) => {
+    const token = req.header('Authorization')?.split(' ')[1];
+    if (!token) return res.status(401).json({ message: 'Token not provided' });
+
+    try {
+
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            console.error(`User with ID ${userId} not found.`);
+            return res.status(404).json({ message: 'User not found. Please check the token.' });
+        }
+
+         // Check if the user is already logged in
+         if (!user.isLoggedIn) {
+            console.error('User already logged out:');
+            return res.status(400).json({ message: 'User is already logged out. Please log in first.' });
+        }
+
+        // Update login status
+        user.isLoggedIn = false;
+        await user.save();
+
+        res.status(200).json({ message: 'Logout successful' });
+    } catch (error) {
+        console.error('Error during logout:', error);
+        res.status(500).json({ message: 'Error logging out', error });
+    }
+};
+
+export { loginUser, registerUser, logoutUser };
