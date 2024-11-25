@@ -16,7 +16,7 @@ import generatePasswordResetEmail from '../utils/emailTemplates.js';
         user.resetPasswordExpire = Date.now() + 400000000;
         await user.save();
 
-        const resetUrl = `${req.protocol}://${req.get('host')}/api/users/resetPassword/${resetToken}`;
+        const resetUrl = `http://localhost:3000/resetPassword?token=${resetToken}`;
         const emailcontent = generatePasswordResetEmail(user.username, resetUrl);
         console.log(emailcontent);
 

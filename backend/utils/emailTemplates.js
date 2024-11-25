@@ -30,7 +30,9 @@ const generatePasswordResetEmail = (username, resetLink) => `
         <h2>Reset Your Password</h2>
         <p>Hello <strong>${username}</strong>,</p>
         <p>We received a request to reset your password. Click the link below to reset it:</p>
-        <p>${resetLink},</p>
+        <a href="${resetLink}" style="display: inline-block; padding: 12px 24px; background-color: #28a745; color: white; font-size: 16px; text-align: center; text-decoration: none; border-radius: 5px;">
+        Reset Your Password
+        </a>
         <p>If you didn't request this, please ignore this email.</p>
         <p>Best regards,</p>
         <p><strong>The AgroTech Team</strong></p>
