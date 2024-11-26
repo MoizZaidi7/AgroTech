@@ -12,8 +12,8 @@ import generatePasswordResetEmail from '../utils/emailTemplates.js';
         if (!user) return res.status(404).json({ message: 'User not found' });
 
         const resetToken = crypto.randomBytes(32).toString('hex');
-        user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-        user.resetPasswordExpire = Date.now() + 400000000;
+        user.verificationToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+        user.verificationTokenExpire = Date.now() + 400000000;
         await user.save();
 
         const resetUrl = `http://localhost:3000/resetPassword?token=${resetToken}`;
@@ -28,8 +28,8 @@ import generatePasswordResetEmail from '../utils/emailTemplates.js';
             });
             res.status(200).json({ message: 'Reset email sent successfully' });
         } catch (emailError) {
-            user.resetPasswordToken = undefined;
-            user.resetPasswordExpire = undefined;
+            user.verificationToken = undefined;
+            user.verificationTokenExpire = undefined;
             await user.save();
             res.status(500).json({ message: 'Error sending email. Please try again later.' });
         }
@@ -44,18 +44,18 @@ import generatePasswordResetEmail from '../utils/emailTemplates.js';
 
     try {
         // Find user by reset token and check expiration
-        const resetPasswordToken = crypto.createHash('sha256').update(token).digest('hex');
+        const verificationToken = crypto.createHash('sha256').update(token).digest('hex');
         const user = await User.findOne({
-            resetPasswordToken,
-            resetPasswordExpire: { $gt: Date.now() },
+            verificationToken,
+            verificationTokenExpire: { $gt: Date.now() },
         });
 
         if (!user) return res.status(400).json({ message: 'Invalid or expired token' });
 
         // Set new password
         user.password = await bcrypt.hash(newPassword, 10);
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpire = undefined;
+        user.verificationToken = undefined;
+        user.verificationTokenExpire = undefined;
 
         await user.save();
 
@@ -81,6 +81,19 @@ const updateProfile = async (req, res) => {
       res.status(500).json({ message: 'Error updating profile', error });
   }
 };
+
+const getUserProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        res.status(200).json({ user });
+      } catch (error) {
+        res.status(500).json({ message: "Error fetching user profile", error });
+      }
+    };
+
 
 const changePassword = async(req, res) => {
   const {currentPassword, newPassword} = req.body;
@@ -115,4 +128,4 @@ const deleteUserAccount = async (req, res) => {
 
 
 
-  export {forgotPassword, resetPassword, updateProfile, changePassword, deleteUserAccount};
+  export {forgotPassword, resetPassword, updateProfile, getUserProfile, changePassword, deleteUserAccount};

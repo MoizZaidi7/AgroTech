@@ -22,8 +22,11 @@ const Login = () => {
         rememberMe
       });
 
-      const { token } = response.data;
-      localStorage.setItem("authToken", token);
+      // Save token to localStorage
+      const { token, expiresIn } = response.data;
+      localStorage.setItem("token", token);
+      localStorage.setItem("expiresIn", expiresIn); // Optional: Save expiration info if needed
+      
       alert("Login successful!");
       navigate("/dashboard");
       setLoading(false);

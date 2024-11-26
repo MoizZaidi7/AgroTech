@@ -7,8 +7,8 @@ const userSchema = new mongoose.Schema({
   userType: { type: String, enum: ['Admin', 'Farmer', 'Customer', 'Seller'], required: true },
   isActive: { type: Boolean, default: true },  
   isLoggedIn: { type : Boolean , default: false},
-  resetPasswordToken: { type: String }, 
-  resetPasswordExpire: { type: Date }, 
+  verificationToken: { type: String }, 
+  verificationTokenExpire: { type: Date }, 
 });
 
 

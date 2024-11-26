@@ -17,19 +17,19 @@ const registerUser = async (req, res) => {
             if (!user) return res.status(404).json({ message: 'User not found' });
 
             // Check if OTP is expired
-            if (user.resetPasswordExpire < Date.now()) {
+            if (user.verificationTokenExpire < Date.now()) {
                 await User.findByIdAndDelete(user._id); // Delete expired user
                 return res.status(400).json({ message: 'OTP expired. Please register again.' });
             }
 
             const hashedOtp = hashOTP(otp);
-            if (user.resetPasswordToken !== hashedOtp) {
+            if (user.verificationToken !== hashedOtp) {
                 return res.status(400).json({ message: 'Invalid OTP. Please try again.' });
             }
 
             // Activate the user account
-            user.resetPasswordToken = undefined;
-            user.resetPasswordExpire = undefined;
+            user.verificationToken = undefined;
+            user.verificationTokenExpire = undefined;
             user.isActive = true;
             await user.save();
 
@@ -71,8 +71,8 @@ const registerUser = async (req, res) => {
             email,
             password: hashedPassword,
             userType,
-            resetPasswordToken: hashedOtp,
-            resetPasswordExpire: Date.now() + 10 * 60 * 1000, // 10 minutes
+            verificationToken: hashedOtp,
+            verificationTokenExpire: Date.now() + 10 * 60 * 1000, // 10 minutes
             isActive: false, // User inactive until OTP is verified
         });
 
@@ -129,6 +129,7 @@ const loginUser = async (req, res) => {
          user.isLoggedIn = true;
          await user.save();
          console.log(user);
+
 
         // Return the logged-in user and token
         res.status(200).json({
