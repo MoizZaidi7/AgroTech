@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../firebase/firebase"; // Import Firebase auth instance
-import { signInWithPopup, GoogleAuthProvider } from "firebase/auth"; // Import Google Sign-In methods
+import { motion } from "framer-motion"; // Importing framer-motion
 
 const Login = () => {
   const navigate = useNavigate();
@@ -11,12 +10,8 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setrememberMe] = useState(false);
 
-  // Initialize Google Auth Provider
-  const provider = new GoogleAuthProvider();
-
-  // Handle traditional login
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -25,13 +20,13 @@ const Login = () => {
       const response = await axios.post("http://localhost:5000/api/users/login", {
         email,
         password,
-        rememberMe,
+        rememberMe
       });
 
       // Save token to localStorage
       const { token, expiresIn } = response.data;
       localStorage.setItem("token", token);
-      localStorage.setItem("expiresIn", expiresIn);
+      localStorage.setItem("expiresIn", expiresIn); // Optional: Save expiration info if needed
 
       alert("Login successful!");
       navigate("/dashboard");
@@ -42,68 +37,111 @@ const Login = () => {
     }
   };
 
-  // Handle Google Sign-In
-  const handleGoogleSignIn = async () => {
-    setError("");
-    setLoading(true);
-
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-
-      // Optionally send the user's data to your backend
-      await axios.post("http://localhost:5000/api/users/google-login", {
-        email: user.email,
-        name: user.displayName,
-        profilePicture: user.photoURL,
-        googleId: user.uid,
-      });
-
-      console.log("Google Sign-In successful:", user);
-      alert("Login successful!");
-      navigate("/dashboard");
-    } catch (err) {
-      console.error("Error during Google Sign-In:", err);
-      setError("Failed to sign in with Google. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <div className="flex h-screen">
-      {/* Left Side: Login Form */}
-      <div className="flex flex-col justify-center items-center w-1/3 bg-gradient-to-br from-green-100 to-white p-8">
-        <h1 className="text-3xl font-bold text-green-700 mb-8">LOGIN</h1>
-        <div className="flex justify-center mb-4 space-x-6">
-          <button className="text-green-700 font-medium underline">User Login</button>
-        </div>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        <form onSubmit={handleLogin} className="w-full max-w-xs">
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2 text-gray-700">User Email</label>
-            <input
+    <div className="flex h-screen relative">
+    {/* Background Video */}
+    <div className="absolute inset-0 w-full h-full">
+      <video
+        className="w-full h-full object-cover"
+        autoPlay
+        loop
+        muted
+        playsInline
+      >
+        <source src="/backvideo.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  
+    {/* Login Block */}
+    <div className="flex items-center justify-center w-full h-full absolute inset-0">
+      <motion.div
+        className="flex flex-col justify-center items-center p-8 rounded-lg shadow-xl w-full max-w-md space-y-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+      >
+        {/* Logo */}
+        <motion.div
+          className="absolute top-4 left-4 flex items-center space-x-3"
+          initial={{ x: "-100%" }}
+          animate={{ x: 0 }}
+          transition={{ type: "spring", stiffness: 100 }}
+        >
+          <img
+            src="/logo.png"
+            alt="Logo"
+            className="h-12 w-12 rounded-full border-2 border-white"
+          />
+          <div className="flex flex-col">
+            <span className="text-white text-2xl font-bold drop-shadow-lg">
+              AgroTech
+            </span>
+            <span className="text-white text-sm font-medium italic drop-shadow-md">
+              Cultivating Smarter Futures
+            </span>
+          </div>
+        </motion.div>
+  
+        <motion.h1
+          className="text-3xl font-bold text-center text-white mb-6 drop-shadow-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 1 }}
+        >
+          LOGIN
+        </motion.h1>
+  
+        {/* Error and Success Messages */}
+        {error && (
+          <motion.p
+            className="text-red-300 text-center mb-4 drop-shadow-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1 }}
+          >
+            {error}
+          </motion.p>
+        )}
+  
+        <form onSubmit={handleLogin} className="w-full space-y-5">
+          <div>
+            <label className="block text-sm font-medium mb-2 text-white">
+              User Email
+            </label>
+            <motion.input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
+              className="w-full px-4 py-2 text-sm bg-transparent border border-white rounded-md text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-green-400"
               placeholder="Enter your email"
               required
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7, duration: 1 }}
             />
           </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2 text-gray-700">Password</label>
-            <input
+  
+          <div>
+            <label className="block text-sm font-medium mb-2 text-white">
+              Password
+            </label>
+            <motion.input
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
+              className="w-full px-4 py-2 text-sm bg-transparent border border-white rounded-md text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-green-400"
               placeholder="Enter your password"
               required
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8, duration: 1 }}
             />
           </div>
-          <div className="flex items-center justify-between mb-4">
-            <label className="flex items-center text-sm">
+  
+          {/* Remember Me and Show Password */}
+          <div className="flex justify-between items-center mb-4">
+            <label className="flex items-center text-sm text-white">
               <input
                 type="checkbox"
                 checked={showPassword}
@@ -113,77 +151,58 @@ const Login = () => {
               Show Password
             </label>
             <button
-              onClick={() => navigate("/forgotPassword")}
+              onClick={() => navigate('/forgotPassword')}
               type="button"
-              className="text-sm text-green-600 hover:underline"
-            >
-              Forget Password
+              className="text-sm text-white hover:text-green-400 transition duration-300 ease-in-out">
+              Forgot Password
             </button>
           </div>
-          <div className="flex items-center justify-between mb-4">
-            {/* Remember Me Checkbox */}
-            <label className="flex items-center text-sm">
+  
+          <div className="flex justify-between items-center mb-4">
+            <label className="flex items-center text-sm text-white">
               <input
                 type="checkbox"
                 checked={rememberMe}
-                onChange={() => setRememberMe(!rememberMe)}
+                onChange={() => setrememberMe(!rememberMe)}
                 className="mr-2"
               />
               Remember Me
             </label>
           </div>
-          <button
+  
+          <motion.button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700"
+            className="w-full bg-green-400 text-white py-2 px-4 rounded-md hover:bg-green-500 transition duration-300 ease-in-out"
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 300 }}
           >
             {loading ? "Logging in..." : "Login"}
-          </button>
+          </motion.button>
         </form>
-
-        {/* Google Sign-In Button */}
-        <div className="mt-4">
-          <button
-            onClick={handleGoogleSignIn}
-            disabled={loading}
-            className="flex items-center justify-center w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-gray-700"
-          >
-            <img
-              src="https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png"
-              alt="Google Logo"
-              className="h-5 w-5 mr-2"
-            />
-            {loading ? "Signing in with Google..." : "Sign in with Google"}
-          </button>
-        </div>
-
+  
         {/* Switch to Register Page */}
-        <div className="mt-4 text-sm text-green-700">
+        <motion.div
+          className="mt-4 text-center text-sm text-white"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2, duration: 1 }}
+        >
           <button
             onClick={() => navigate("/register")}
-            className="underline font-medium"
+            className="text-green hover:text-green-400 transition duration-300 ease-in-out underline"
           >
             Don't have an account? Register
           </button>
-        </div>
-      </div>
-
-      {/* Right Side: Background Image */}
-      <div
-        className="w-2/3 bg-cover bg-center"
-        style={{
-          backgroundImage: "url('/Agrotech.webp')",
-        }}
-      >
-        <div className="h-full flex flex-col justify-center items-center bg-opacity-50 bg-gray-700 text-white">
-          <h2 className="text-4xl font-bold mb-2">AgroTech</h2>
-          <p className="text-lg">Where Farming Meets Technology.</p>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </div>
+  </div>
+  
+  
   );
 };
 
 export default Login;
-
-

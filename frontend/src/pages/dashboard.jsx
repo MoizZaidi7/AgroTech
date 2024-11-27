@@ -1,132 +1,167 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom"; // Updated import for useNavigate
 
-const Dashboard = () => {
-  const navigate = useNavigate();
-  const [user, setUser] = useState(null); // State to store user data
-  const [loading, setLoading] = useState(true); // State to handle loading
-  const [error, setError] = useState(null); // State to handle errors
+const DashboardPage = () => {
+  const [showLoginPopup, setShowLoginPopup] = useState(false); // State for handling the login popup
+  const [popupMessage, setPopupMessage] = useState(""); // State for the message in the popup
+  const navigate = useNavigate(); // Using useNavigate for navigation
 
-  // Fetch user data when the component loads
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          console.log("No token found. Redirecting to login.");
-          navigate('/login'); // Redirect to login if no token
-          return;
-        }
-
-        // Fetch user data from the API
-        const response = await axios.get('http://localhost:5000/api/users/UserProfile', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        setUser(response.data.user); // Update user state with the fetched data
-        setLoading(false); // Stop the loading spinner
-      } catch (error) {
-        console.error("Failed to fetch user data:", error.response?.data?.message || error.message);
-        setError("Failed to load user data. Please try again later.");
-        setLoading(false); // Stop the loading spinner
-      }
-    };
-
-    fetchUserData();
-  }, [navigate]);
-
-  // Handle logout
-  const handleLogout = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.log("No token found. User might not be logged in.");
-        return;
-      }
-
-      // Send POST request to logout the user
-      const response = await axios.post(
-        'http://localhost:5000/api/users/logout',
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      // On success, clear the token and user data from localStorage
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
-
-      console.log(response.data.message);
-
-      // Redirect to login page
-      navigate('/login');
-    } catch (error) {
-      console.error("Logout failed:", error.response?.data?.message || error.message);
-    }
+  const handleNavigationClick = (route) => {
+    setShowLoginPopup(true);
+    setPopupMessage("Can't Access This!Login First");
+    setTimeout(() => {
+      // Redirect to the login page after 3 seconds using navigate
+      navigate("/login");
+    }, 3000);
   };
 
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-red-600">
-        {error}
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center">
-      {/* Dashboard Header */}
-      <div className="w-full bg-blue-500 text-white py-4 shadow-md">
-        <h1 className="text-center text-2xl font-bold">AgroTech Dashboard</h1>
+    <div className="relative min-h-screen bg-white">
+      {/* Favicon */}
+      <link rel="icon" type="image/png" href="/logo.png" />
+
+      {/* Background Video */}
+      <div className="absolute inset-0 w-full h-full">
+        <video
+          className="w-full h-full object-cover"
+          autoPlay
+          loop
+          muted
+          playsInline
+        >
+          <source src="/backvideo.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
       </div>
 
-      {/* Dashboard Content */}
-      <div className="container mx-auto mt-8 p-6 bg-white rounded-lg shadow-lg w-11/12 lg:w-2/3">
-        <h2 className="text-xl font-semibold mb-4">Welcome, {user?.username}!</h2>
+      {/* Top Bar */}
+      <motion.div
+       className="fixed inset-x-0 top-0 flex justify-between items-center p-2 bg-white backdrop-blur-md z-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+      >
+        {/* Logo */}
+        <motion.div
+          className="flex items-center space-x-2"
+          initial={{ opacity: 0, x: -100 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1 }}
+        >
+          <img
+            src="/logo.png"
+            alt="Logo"
+            className="h-10 w-10 bg-opacity-70 rounded-full border-2 border-white"
+          />
+          <div className="flex flex-col">
+            <span className="text-green-700 text-xl font-bold">AgroTech</span>
+            <span className="text-green-600 text-xs font-medium italic">Cultivating Smarter Futures</span>
+          </div>
+        </motion.div>
 
-        <div className="mb-6">
-          <p><strong>Email:</strong> {user?.email}</p>
-          <p><strong>Role:</strong> {user?.userType}</p>
-        </div>
-
-        {/* Dashboard Navigation */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <button className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded">
-            Crop Health Monitoring
-          </button>
-          <button className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded">
-            Soil Analysis
-          </button>
-          <button className="bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-4 rounded">
-            Yield Prediction
-          </button>
-          <button className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded">
-            Account Settings
-          </button>
-        </div>
-
-        {/* Logout Button */}
-        <div className="mt-6">
+        {/* Navigation Links */}
+        <motion.div
+          className="flex space-x-4 text-lg text-green-700"
+          initial={{ opacity: 0, x: 100 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1 }}
+        >
           <button
-            className="bg-gray-800 hover:bg-gray-900 text-white py-2 px-4 rounded w-full"
-            onClick={handleLogout}
+            onClick={() => handleNavigationClick("/")}
+            className="hover:text-green-900"
           >
-            Logout
+            Home
           </button>
+          <button
+            onClick={() => handleNavigationClick("/marketplace")}
+            className="hover:text-green-900"
+          >
+            Marketplace
+          </button>
+          <Link to="/support" className="hover:text-green-900">Support</Link>
+          <Link to="/login" className="hover:text-green-900">Login / SignUp</Link>
+        </motion.div>
+      </motion.div>
+
+      {/* Login Popup */}
+      {showLoginPopup && (
+  <div className="fixed inset-0 flex items-center justify-center z-20 bg-black bg-opacity-50">
+    <motion.div
+      className="bg-white p-8 rounded-lg shadow-lg w-80 text-center"
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <p className="text-lg font-bold text-gray-800 mb-4">
+        {popupMessage}
+      </p>
+      <button
+        onClick={() => setShowLoginPopup(false)}
+        className="bg-green-700 text-white px-4 py-2 rounded-full hover:bg-green-800 transition-colors duration-300 mt-4"
+      >
+        Close
+      </button>
+    </motion.div>
+  </div>
+)}
+
+
+      {/* Main Content Section */}
+      <motion.div
+        className="relative z-0 pt-24 px-6 py-8"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+      >
+        <h1 className="text-4xl font-bold text-center text-green-700 mb-8">
+          Welcome to AgroTech Dashboard
+        </h1>
+        <p className="text-center text-lg text-gray-600">
+          Manage your farming activities, monitor crops, and access resources.
+        </p>
+
+        {/* Additional content can go here */}
+        <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <motion.div
+            className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <h2 className="text-xl font-semibold text-green-700">Crop Management</h2>
+            <p className="text-sm text-gray-600 mt-2">
+              Monitor crop health, water, nutrient levels, and yield.
+            </p>
+          </motion.div>
+
+          <motion.div
+            className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+          >
+            <h2 className="text-xl font-semibold text-green-700">Marketplace</h2>
+            <p className="text-sm text-gray-600 mt-2">
+              Buy, sell, and bid on agricultural products and services.
+            </p>
+          </motion.div>
+
+          <motion.div
+            className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.7 }}
+          >
+            <h2 className="text-xl font-semibold text-green-700">Support</h2>
+            <p className="text-sm text-gray-600 mt-2">
+              Get help with using the platform, troubleshoot issues, and more.
+            </p>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
 
-export default Dashboard;
+export default DashboardPage;

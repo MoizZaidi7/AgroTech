@@ -37,6 +37,7 @@ import generatePasswordResetEmail from '../utils/emailTemplates.js';
         res.status(500).json({ message: 'Error processing request', error });
     }
 };
+    // Reset Password
     const resetPassword = async (req, res) => {
     const { token } = req.params;
     const { newPassword } = req.body;
@@ -114,6 +115,7 @@ const changePassword = async(req, res) => {
 
   };
 
+  // Delete user account
 const deleteUserAccount = async (req, res) => {
   try {
       await User.findByIdAndDelete(req.user.id);

@@ -143,55 +143,6 @@ const loginUser = async (req, res) => {
     }
 };
 
-const googleLogin = async (req, res) => {
-    const { email, googleId, name, profilePicture } = req.body;
-  
-    try {
-      // Check if the user exists
-      let user = await User.findOne({ email });
-  
-      // If user does not exist, create a new one
-      if (!user) {
-        user = new User({
-          username: name,
-          email,
-          googleId, // Only include googleId for Google login
-          profilePicture,
-          userType: 'Customer', // Default user type for Google sign-in
-          isActive: true,       // Google users are active by default
-        });
-  
-        await user.save();
-      } else {
-        // If user exists but does not have a Google ID, update it
-        if (!user.googleId && googleId) {
-          user.googleId = googleId;
-          await user.save();
-        }
-      }
-  
-      // Generate JWT token
-      const token = generateToken(user._id, '7d'); // 7-day token for Google sign-in
-  
-      // Return success response
-      res.status(200).json({
-        message: 'Google login successful',
-        user: {
-          username: user.username,
-          email: user.email,
-          userType: user.userType,
-          profilePicture: user.profilePicture,
-        },
-        token,
-        expiresIn: '7d',
-      });
-    } catch (error) {
-      console.error('Error in Google login:', error);
-      res.status(500).json({ message: 'Error logging in with Google', error });
-    }
-  };
-  
-
 const logoutUser = async (req, res) => {
     const token = req.header('Authorization')?.split(' ')[1];
     if (!token) return res.status(401).json({ message: 'Token not provided' });
@@ -221,4 +172,4 @@ const logoutUser = async (req, res) => {
     }
 };
 
-export { loginUser, registerUser, googleLogin , logoutUser };
+export { loginUser, registerUser, logoutUser };

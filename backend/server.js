@@ -3,8 +3,6 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import userRouter from './routes/UserRoutes.js';
 import connectDB from "./config/db.js";
-import authMiddleware from "./middleware/authMiddleware.js";
-import AdminRouter from "./routes/AdminRoutes.js";
 
 // Load environment variables
 dotenv.config();
@@ -22,7 +20,6 @@ app.use(express.json());  // Parse JSON requests
 
 // Routes
 app.use('/api/users', userRouter);
-app.use('/api/admin', authMiddleware, AdminRouter);
 
 // Default Route
 app.get('/', (req, res) => {
