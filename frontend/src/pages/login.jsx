@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { auth } from "../firebase/firebase"; // Import Firebase auth instance
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth"; // Import Google Sign-In methods
 
 const Login = () => {
   const navigate = useNavigate();
@@ -9,8 +11,12 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [rememberMe, setrememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
+  // Initialize Google Auth Provider
+  const provider = new GoogleAuthProvider();
+
+  // Handle traditional login
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -19,19 +25,47 @@ const Login = () => {
       const response = await axios.post("http://localhost:5000/api/users/login", {
         email,
         password,
-        rememberMe
+        rememberMe,
       });
 
       // Save token to localStorage
       const { token, expiresIn } = response.data;
       localStorage.setItem("token", token);
-      localStorage.setItem("expiresIn", expiresIn); // Optional: Save expiration info if needed
-      
+      localStorage.setItem("expiresIn", expiresIn);
+
       alert("Login successful!");
       navigate("/dashboard");
       setLoading(false);
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
+      setLoading(false);
+    }
+  };
+
+  // Handle Google Sign-In
+  const handleGoogleSignIn = async () => {
+    setError("");
+    setLoading(true);
+
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // Optionally send the user's data to your backend
+      await axios.post("http://localhost:5000/api/users/google-login", {
+        email: user.email,
+        name: user.displayName,
+        profilePicture: user.photoURL,
+        googleId: user.uid,
+      });
+
+      console.log("Google Sign-In successful:", user);
+      alert("Login successful!");
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("Error during Google Sign-In:", err);
+      setError("Failed to sign in with Google. Please try again.");
+    } finally {
       setLoading(false);
     }
   };
@@ -78,11 +112,12 @@ const Login = () => {
               />
               Show Password
             </label>
-            <button 
-            onClick={() => navigate('/forgotPassword')} 
-            type="button" 
-            className="text-sm text-green-600 hover:underline">
-            Forget Password
+            <button
+              onClick={() => navigate("/forgotPassword")}
+              type="button"
+              className="text-sm text-green-600 hover:underline"
+            >
+              Forget Password
             </button>
           </div>
           <div className="flex items-center justify-between mb-4">
@@ -91,7 +126,7 @@ const Login = () => {
               <input
                 type="checkbox"
                 checked={rememberMe}
-                onChange={() => setrememberMe(!rememberMe)}
+                onChange={() => setRememberMe(!rememberMe)}
                 className="mr-2"
               />
               Remember Me
@@ -105,6 +140,23 @@ const Login = () => {
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
+
+        {/* Google Sign-In Button */}
+        <div className="mt-4">
+          <button
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="flex items-center justify-center w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-red-700"
+          >
+            <img
+              src="https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png"
+              alt="Google Logo"
+              className="h-5 w-5 mr-2"
+            />
+            {loading ? "Signing in with Google..." : "Sign in with Google"}
+          </button>
+        </div>
+
         {/* Switch to Register Page */}
         <div className="mt-4 text-sm text-green-700">
           <button
@@ -133,4 +185,5 @@ const Login = () => {
 };
 
 export default Login;
+
 

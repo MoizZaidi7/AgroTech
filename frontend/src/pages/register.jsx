@@ -7,7 +7,7 @@ const Register = () => {
     username: "",
     email: "",
     password: "",
-    userType: "user",
+    userType: "Admin",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
