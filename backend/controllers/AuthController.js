@@ -155,7 +155,7 @@ const googleLogin = async (req, res) => {
         user = new User({
           username: name,
           email,
-          googleId,
+          googleId, // Only include googleId for Google login
           profilePicture,
           userType: 'Customer', // Default user type for Google sign-in
           isActive: true,       // Google users are active by default
@@ -164,7 +164,7 @@ const googleLogin = async (req, res) => {
         await user.save();
       } else {
         // If user exists but does not have a Google ID, update it
-        if (!user.googleId) {
+        if (!user.googleId && googleId) {
           user.googleId = googleId;
           await user.save();
         }

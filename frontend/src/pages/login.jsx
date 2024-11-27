@@ -146,7 +146,7 @@ const Login = () => {
           <button
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="flex items-center justify-center w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-red-700"
+            className="flex items-center justify-center w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-gray-700"
           >
             <img
               src="https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png"
