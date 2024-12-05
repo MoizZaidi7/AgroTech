@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
+import User from '../models/User.js';  // Import the User model to fetch user data
 
-const authMiddleware = (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
   // Extract the token from the Authorization header
   const token = req.header('Authorization')?.split(' ')[1];
 
@@ -15,6 +16,14 @@ const authMiddleware = (req, res, next) => {
 
     // Attach the decoded payload (e.g., user ID) to the request object
     req.user = verified;
+    // Find user by the ID in the token (ensure user exists and attach userType)
+    const user = await User.findById(verified.id).select('userType'); // Adjust according to your schema
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    // Attach user and userType to the request object
+    req.user = { id: user._id, userType: user.userType }; // Attach only the needed fields
+    console.log('User data attached to request:', req.user); // Debugging line
 
     // Proceed to the next middleware or route handler
     next();

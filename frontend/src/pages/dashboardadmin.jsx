@@ -1,11 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
 const DashAdmin = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [userData, setUserData] = useState([]);
   const navigate = useNavigate();
 
 //   useEffect(() => {

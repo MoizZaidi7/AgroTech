@@ -55,6 +55,14 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: 'Invalid user type' });
         }
 
+        // Restrict to one Admin registration
+        if (userType === 'Admin') {
+            const existingAdmin = await User.findOne({ userType: 'Admin' });
+            if (existingAdmin) {
+                return res.status(400).json({ message: 'An admin is already registered. Only one admin is allowed.' });
+            }
+        }
+
         // Validate password
         const { isValid, message } = validatePassword(password);
         if (!isValid) {
@@ -143,6 +151,60 @@ const loginUser = async (req, res) => {
     }
 };
 
+const googleLogin = async (req, res) => {
+    const { email, googleId, name, profilePicture } = req.body;
+  
+    try {
+      // Validate required fields
+      if (!email || !googleId || !name) {
+        return res.status(400).json({ message: 'Missing required fields' });
+      }
+  
+      // Check if the user exists
+      let user = await User.findOne({ email });
+  
+      // If the user does not exist, create a new one
+      if (!user) {
+        user = new User({
+          username: name,
+          email,
+          googleId, // Set Google ID for Google login
+          profilePicture,
+          userType: 'Customer', // Default user type for Google sign-in
+          isActive: true,       // Google users are active by default
+        });
+  
+        await user.save();
+      } else {
+        // If the user exists but does not have a Google ID, update it
+        if (!user.googleId && googleId) {
+          user.googleId = googleId;
+          await user.save();
+        }
+      }
+  
+      // Generate JWT token (ensure generateToken is defined elsewhere in your code)
+      const token = generateToken(user._id, '7d'); // Token valid for 7 days
+  
+      // Return success response with user data and token
+      res.status(200).json({
+        message: 'Google login successful',
+        user: {
+          username: user.username,
+          email: user.email,
+          userType: user.userType,
+          profilePicture: user.profilePicture,
+        },
+        token,
+        expiresIn: '7d',
+      });
+    } catch (error) {
+      console.error('Error in Google login:', error);
+      res.status(500).json({ message: 'Error logging in with Google', error });
+    }
+  };
+
+  
 const logoutUser = async (req, res) => {
     const token = req.header('Authorization')?.split(' ')[1];
     if (!token) return res.status(401).json({ message: 'Token not provided' });
@@ -172,4 +234,4 @@ const logoutUser = async (req, res) => {
     }
 };
 
-export { loginUser, registerUser, logoutUser };
+export { loginUser, registerUser, logoutUser, googleLogin}

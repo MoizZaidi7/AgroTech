@@ -5,7 +5,7 @@ import Register from "./pages/register"
 import Dashboard from "./pages/dashboard"
 import ForgotPassword from "./pages/forgotPassword";
 import ResetPassword from "./pages/resetPassword";
-import DashAdmin from "./pages/dashadmin";
+import DashAdmin from "./pages/dashboardadmin";
 
 const App = () => {
   return (
@@ -15,9 +15,9 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboardadmin" element={<DashAdmin />}/>
         <Route path="/forgotPassword" element={<ForgotPassword />} />
         <Route path="/resetPassword" element={<ResetPassword />} />
-        <Route path="/dashadmin" element={<DashAdmin />} />
 
       </Routes>
     </Router>

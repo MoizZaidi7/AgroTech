@@ -110,7 +110,7 @@ const changePassword = async(req, res) => {
       res.status(200).json({message: 'Password Updated Successfully'});
     } catch (error) {
         res.status(500).json({message:'Error updating password', error});
- 
+
       }
 
   };
@@ -124,7 +124,6 @@ const deleteUserAccount = async (req, res) => {
       res.status(500).json({ message: 'Error deleting account', error });
   }
 };
-
 
 
 
