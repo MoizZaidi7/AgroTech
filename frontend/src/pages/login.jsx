@@ -33,7 +33,7 @@ const Login = () => {
       localStorage.setItem("expiresIn", expiresIn);
 
       alert("Login successful!");
-      navigate("/dashboard");
+      navigate("/dashboardadmin");
       setLoading(false);
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
