@@ -13,10 +13,10 @@ userRouter.post('/resetPassword/:token', resetPassword);  //Reset Password
 userRouter.post("/google-login", googleLogin);
 
 
-userRouter.get('/UserProfile', authMiddleware, authorize(['viewProfile']), getUserProfile); 
-userRouter.put('/changePassword', authMiddleware, authorize(['changePassword']), changePassword); 
-userRouter.put('/profile', authMiddleware, authorize(['updateProfile']), updateProfile); 
-userRouter.delete('/delete', authMiddleware, authorize(['deleteAccount']), deleteUserAccount); 
+userRouter.get('/UserProfile', authMiddleware, getUserProfile); 
+userRouter.put('/changePassword', authMiddleware, changePassword); 
+userRouter.put('/profile', authMiddleware, updateProfile); 
+userRouter.delete('/delete', authMiddleware, deleteUserAccount); 
 userRouter.post('/logout', authMiddleware, logoutUser); 
 
 export default userRouter;

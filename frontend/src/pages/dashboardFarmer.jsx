@@ -2,10 +2,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { logout } from '../Redux/authslice';
+import { logout } from '../Redux/authslice'; // Adjust the path if necessary
 import axiosInstance from '../utils/axiosconfig';
 
-const DashAdmin = () => {
+const DashFarmer = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -33,12 +33,9 @@ const DashAdmin = () => {
       alert('Logout failed. Please try again.');
     }
   };
-  
-
 
   return (
     <div className="relative min-h-screen bg-white">
-      {/* Background Video */}
       <div className="absolute inset-0 w-full h-full">
         <video
           className="w-full h-full object-cover"
@@ -59,50 +56,38 @@ const DashAdmin = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
       >
-        <h1 className="text-4xl font-bold text-center text-green-700 mb-8">
-          Admin Dashboard
-        </h1>
-        <button
+        <div className="flex justify-between items-center">
+          <h1 className="text-4xl font-bold text-green-700 mb-8">Farmer Dashboard</h1>
+          <button
             onClick={handleLogout}
             className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition"
           >
             Logout
           </button>
+        </div>
         <p className="text-center text-lg text-gray-600">
-          Manage user profiles, monitor system performance, and more.
+          Access tools and services tailored for farmers.
         </p>
 
-        {/* Admin Functionalities */}
+        {/* Farmer Functionalities */}
         <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           <DashboardTile
-            title="Manage Users"
-            description="Oversee and manage user profiles and actions."
-            navigateTo="/ManageUsers"
+            title="Soil Analysis"
+            description="Analyze soil quality for better crop yields."
+            navigateTo="/soil-analysis"
             delay={0.3}
           />
           <DashboardTile
-            title="Manage Complaints"
-            description="Handle user complaints and issues."
-            navigateTo="/admin/complaints"
+            title="Crop Recommendation"
+            description="Get crop suggestions based on soil and climate data."
+            navigateTo="/crop-recommendation"
             delay={0.5}
           />
           <DashboardTile
-            title="Generate Reports"
-            description="Generate various reports for system analysis."
-            navigateTo="/admin/reports"
+            title="Market Insights"
+            description="Explore market trends and sell your crops."
+            navigateTo="/online-marketplace"
             delay={0.7}
-          />
-          <DashboardTile
-            title="Resolve Complaints"
-            description="Resolve pending complaints from users."
-            navigateTo="/admin/resolve-complaints"
-            delay={0.9}
-          />
-          <DashboardTile
-            title="Register User"
-            description="Register new users with custom roles."
-            navigateTo="/RegisterUserByAdmin"
-            delay={1.1}
           />
         </div>
       </motion.div>
@@ -127,4 +112,4 @@ const DashboardTile = ({ title, description, navigateTo, delay }) => {
   );
 };
 
-export default DashAdmin;
+export default DashFarmer;

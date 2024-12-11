@@ -1,12 +1,17 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../utils/axiosconfig";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { auth } from "../firebase/firebase"; // Import Firebase auth instance
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth"; // Import Google Sign-In methods
+import { login } from '../Redux/authslice';
+import { useDispatch } from 'react-redux';
+
+
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -22,19 +27,30 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:5000/api/users/login", {
+      const response = await axiosInstance.post("http://localhost:5000/api/users/login", {
         email,
         password,
         rememberMe,
       });
 
-      const { token, expiresIn } = response.data;
+      const { token, expiresIn, user } = response.data;
       localStorage.setItem("token", token);
       localStorage.setItem("expiresIn", expiresIn);
+      localStorage.setItem("user", user);
+
+      dispatch(login({ user, token }));
+
 
       alert("Login successful!");
+      // Navigate based on user role or type
+    if (user.userType === "Admin") {
       navigate("/dashboardadmin");
-      setLoading(false);
+    } else if (user.userType === "Farmer") {
+      navigate("/dashboardFarmer");
+    } 
+    else {
+      navigate("/dashboard"); // Fallback to a generic dashboard
+    }
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
       setLoading(false);
@@ -49,7 +65,7 @@ const Login = () => {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      await axios.post("http://localhost:5000/api/users/google-login", {
+      await axiosInstance.post("http://localhost:5000/api/users/google-login", {
         email: user.email,
         name: user.displayName,
         profilePicture: user.photoURL,

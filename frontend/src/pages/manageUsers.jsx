@@ -1,19 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axiosInstance from '../utils/axiosconfig';
 
 const ManageUsers = () => {
   const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Fetch Users
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/admin/users', {
+        const response = await axiosInstance.get('http://localhost:5000/api/admin/users', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
-        console.log('Fetched Users:', response.data); // Debugging
         setUsers(response.data.users);
       } catch (error) {
         console.error('Error fetching users:', error.response?.data || error.message);
@@ -21,6 +24,60 @@ const ManageUsers = () => {
     };
     fetchUsers();
   }, []);
+
+  // Delete User
+  const handleDeleteUser = async (userId) => {
+    try {
+      const response = await axiosInstance.delete(`http://localhost:5000/api/admin/users/${userId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+
+      if (response.status === 200) {
+        alert('User deleted successfully');
+        setUsers(users.filter(user => user._id !== userId));
+      } else {
+        alert('Error deleting user');
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error.response?.data || error.message);
+      alert('Error deleting user. Please try again or contact support.');
+    }
+  };
+
+  // Open Modal for Editing
+  const handleEditUser = (user) => {
+    setSelectedUser(user);
+    setIsModalOpen(true);
+  };
+
+  // Save User Changes
+  const handleSaveChanges = async () => {
+    if (!selectedUser) return;
+    setLoading(true);
+
+    try {
+      const response = await axiosInstance.put(
+        `http://localhost:5000/api/admin/users/${selectedUser._id}`,
+        selectedUser,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        }
+      );
+
+      if (response.status === 200) {
+        alert('User updated successfully');
+        setUsers(users.map(user => (user._id === selectedUser._id ? selectedUser : user)));
+        setIsModalOpen(false);
+      } else {
+        alert('Failed to update user.');
+      }
+    } catch (error) {
+      console.error('Error updating user:', error.response?.data || error.message);
+      alert('Failed to update user. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="relative min-h-screen bg-white">
@@ -69,7 +126,7 @@ const ManageUsers = () => {
         <motion.div
           className="flex space-x-4 text-lg text-green-700"
           initial={{ opacity: 0, x: 100 }}
-          animate={{ opacity: 1, x: 0 }}
+          animate={{ opacity: 1 }}
           transition={{ duration: 1 }}
         >
           <button
@@ -119,13 +176,13 @@ const ManageUsers = () => {
               <div className="mt-4">
                 <button
                   className="text-green-700 hover:text-green-900 mr-2"
-                  onClick={() => navigate(`/admin/edit-user/${user._id}`)}
+                  onClick={() => handleEditUser(user)}
                 >
                   Edit
                 </button>
                 <button
                   className="text-red-700 hover:text-red-900"
-                  onClick={() => console.log('Delete User')}
+                  onClick={() => handleDeleteUser(user._id)}
                 >
                   Delete
                 </button>
@@ -134,6 +191,77 @@ const ManageUsers = () => {
           ))}
         </div>
       </motion.div>
+
+      {/* Edit Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+            <h2 className="text-2xl font-bold text-green-700 mb-4 text-center">Edit User</h2>
+            <form>
+              <div className="mb-4">
+                <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  value={selectedUser?.username || ''}
+                  onChange={(e) => setSelectedUser({ ...selectedUser, username: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 border rounded-lg"
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={selectedUser?.email || ''}
+                  onChange={(e) => setSelectedUser({ ...selectedUser, email: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 border rounded-lg"
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="userType" className="block text-sm font-medium text-gray-700">
+                  User Type
+                </label>
+                <select
+                  id="userType"
+                  name="userType"
+                  value={selectedUser?.userType || ''}
+                  onChange={(e) => setSelectedUser({ ...selectedUser, userType: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 border rounded-lg"
+                >
+                  <option value="">Select a type</option>
+                  <option value="Farmer">Farmer</option>
+                  <option value="Customer">Customer</option>
+                  <option value="Seller">Seller</option>
+                </select>
+              </div>
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  className="bg-gray-300 text-gray-700 py-2 px-4 rounded-lg mr-2"
+                  onClick={() => setIsModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition"
+                  onClick={handleSaveChanges}
+                  disabled={loading}
+                >
+                  {loading ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

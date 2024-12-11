@@ -22,7 +22,7 @@ const authMiddleware = async (req, res, next) => {
       return res.status(404).json({ message: 'User not found' });
     }
     // Attach user and userType to the request object
-    req.user = { id: user._id, userType: user.userType }; // Attach only the needed fields
+    req.user = { id: user._id, userType: user.userType }; // Ensure `userType` is included
     console.log('User data attached to request:', req.user); // Debugging line
 
     // Proceed to the next middleware or route handler
