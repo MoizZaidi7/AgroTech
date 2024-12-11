@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axiosInstance from "../utils/axiosconfig";
+import axiosInstance from "../utils/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { auth } from "../firebase/firebase"; // Import Firebase auth instance

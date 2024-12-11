@@ -1,3 +1,4 @@
+
 // middlewares/authorize.js
 import roles from '../config/roles.js';
 const authorize = (allowedRoles) => {

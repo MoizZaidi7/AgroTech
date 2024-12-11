@@ -99,30 +99,6 @@ const Register = () => {
     </video>
   </div>
 
-  {/* Logo */}
-  <motion.div
-    className="absolute top-4 left-4 flex items-center space-x-3"
-    initial={{ opacity: 0, x: -100 }}
-    animate={{ opacity: 1, x: 0 }}
-    transition={{ duration: 1 }}
-  >
-    {/* Logo */}
-    <img
-      src="/logo.png"
-      alt="Logo"
-      className="h-12 w-12 bg-opacity-70 rounded-full border-2 border-white"
-    />
-    {/* Text */}
-    <div className="flex flex-col">
-      <span className="text-white text-2xl font-bold drop-shadow-lg">
-        AgroTech
-      </span>
-      <span className="text-white text-sm font-medium italic drop-shadow-md">
-        Cultivating Smarter Futures
-      </span>
-    </div>
-  </motion.div>
-
   {/* Centered Form Container */}
   <motion.div
     className="absolute inset-0 flex items-center justify-center"

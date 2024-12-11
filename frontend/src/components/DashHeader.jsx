@@ -1,13 +1,41 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useDispatch } from 'react-redux';
+import { logout } from '../Redux/authslice'; // Adjust the path if necessary
+import axiosInstance from '../utils/axiosConfig';
 
-const Header = () => {
-  const navigate = useNavigate();
-
-  const handleNavigationClick = (path) => {
-    navigate(path); // Navigate to the specified path
-  };
+const DashHeader = () => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+const handleNavigationClick = (path) => {
+        navigate(path); // Navigate to the specified path
+      };
+  
+    const handleLogout = async () => {
+      try {
+        // Call the logout API
+        await axiosInstance.post(
+          'http://localhost:5000/api/users/logout', // URL
+          {}, // No body data needed for logout
+          {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }, // Headers with token
+          }
+        );
+    
+        // Dispatch Redux logout action
+        dispatch(logout());
+    
+        // Clear any localStorage token if stored
+        localStorage.removeItem('token');
+    
+        // Navigate to login page
+        navigate('/login');
+      } catch (error) {
+        console.error('Error during logout:', error.response?.data || error.message);
+        alert('Logout failed. Please try again.');
+      }
+    };
 
   return (
     <div className="relative">
@@ -61,13 +89,17 @@ const Header = () => {
           <Link to="/support" className="hover:text-green-900">
             Support
           </Link>
-          <Link to="/login" className="hover:text-green-900">
-            Login / SignUp
-          </Link>
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 text-white py-1 px-2 rounded-lg hover:bg-red-600 transition"
+            >
+            Logout
+          </button>
+          
         </motion.div>
       </motion.div>
     </div>
   );
 };
 
-export default Header;
+export default DashHeader;

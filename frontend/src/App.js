@@ -1,63 +1,119 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import PrivateRoute from "./components/PrivateRoute";
+import { BrowserRouter as Router, useRoutes } from "react-router-dom";
+import PrivateRoute from "./routes/PrivateRoute.jsx";
 import Login from "./pages/login";
-import Register from "./pages/register"
-import Dashboard from "./pages/dashboard"
+import Register from "./pages/register";
+import Dashboard from "./pages/dashboard";
 import ForgotPassword from "./pages/forgotPassword";
 import ResetPassword from "./pages/resetPassword";
 import DashAdmin from "./pages/dashboardadmin";
-import DashFarmer from "./pages/dashboardFarmer";
+import DashFarmer from "./pages/dashboardfarmer";
 import ManageUsers from "./pages/manageUsers";
 import Header from "./components/Header";
-import RegisterUserByAdmin from "./pages/RegisterUserByAdmin";
+import DashHeader from "./components/DashHeader.jsx";
+import RegisterUserByAdmin from "./pages/RegisterUserByAdmin.jsx";
+import PublicRoute from "./routes/publicroute.jsx";
 
-const App = () => {
-  return (
-    <Router>
-      <Header />
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/forgotPassword" element={<ForgotPassword />} />
-        <Route path="/resetPassword" element={<ResetPassword />} />
-        <Route
-            path="/dashboardadmin"
-            element={
-              <PrivateRoute roles={['Admin']}>
-                <DashAdmin />
-              </PrivateRoute>
-            }
-          />
-        <Route
-            path="/ManageUsers"
-            element={
-              <PrivateRoute roles={['Admin']}>
-                <ManageUsers />
-              </PrivateRoute>
-            }
-          />
-        <Route
-            path="/RegisterUserByAdmin"
-            element={
-              <PrivateRoute roles={['Admin']}>
-                <RegisterUserByAdmin />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/dashboardfarmer"
-            element={
-              <PrivateRoute roles={['Farmer']}>
-                <DashFarmer />
-              </PrivateRoute>
-            }
-          />
-      </Routes>
-    </Router>
-  );
+const AppRoutes = () => {
+  return useRoutes([
+    {
+      path: "/",
+      element: (
+        <>
+          <Header />
+          <Dashboard />
+        </>
+      ),
+    },
+    {
+      path: "/login",
+      element: (
+        <PublicRoute>
+        <>
+          <Header />
+          <Login />
+        </>
+        </PublicRoute>
+      ),
+    },
+    {
+      path: "/register",
+      element: (
+        <>
+          <Header />
+          <Register />
+        </>
+      ),
+    },
+    {
+      path: "/forgotPassword",
+      element: (
+        <>
+          <Header />
+          <ForgotPassword />
+        </>
+      ),
+    },
+    {
+      path: "/resetPassword",
+      element: (
+        <>
+          <Header />
+          <ResetPassword />
+        </>
+      ),
+    },
+    {
+      path: "/dashboardadmin",
+      element: (
+        <PrivateRoute roles={["Admin"]}>
+          <>
+            <DashHeader />
+            <DashAdmin />
+          </>
+        </PrivateRoute>
+      ),
+    },
+    {
+      path: "/ManageUsers",
+      element: (
+        <PrivateRoute roles={["Admin"]}>
+          <>
+            <DashHeader />
+            <ManageUsers />
+          </>
+        </PrivateRoute>
+      ),
+    },
+    {
+      path: "/RegisterUserByAdmin",
+      element: (
+        <PrivateRoute roles={["Admin"]}>
+          <>
+            <DashHeader />
+            <RegisterUserByAdmin />
+          </>
+        </PrivateRoute>
+      ),
+    },
+    {
+      path: "/dashboardfarmer",
+      element: (
+        <PrivateRoute roles={["Farmer"]}>
+          <>
+            <DashHeader />
+            <DashFarmer />
+          </>
+        </PrivateRoute>
+      ),
+    },
+  ]);
 };
+
+const App = () => (
+  <Router>
+    <AppRoutes />
+  </Router>
+);
 
 export default App;

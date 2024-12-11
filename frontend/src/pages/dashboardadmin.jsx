@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '../Redux/authslice';
-import axiosInstance from '../utils/axiosconfig';
+import axiosInstance from '../utils/axiosConfig';
 
 const DashAdmin = () => {
   const dispatch = useDispatch();
