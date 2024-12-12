@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux"; // Added useSelector to get user info from Redux
 import { logout } from "../Redux/authslice"; // Adjust the path if necessary
-import axiosInstance from "../utils/axiosconfig";
+import axiosInstance from "../utils/axiosConfig";
 
 const DashHeader = () => {
   const dispatch = useDispatch();

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../utils/axiosconfig';
+import axiosInstance from '../utils/axiosConfig';
 
 const ManageUsers = () => {
   const [users, setUsers] = useState([]);

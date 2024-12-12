@@ -1,9 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-
 const DashFarmer = () => {
-  
   return (
     <div className="relative min-h-screen bg-white">
       <div className="absolute inset-0 w-full h-full">
