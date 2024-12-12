@@ -1,40 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { logout } from '../Redux/authslice';
-import axiosInstance from '../utils/axiosconfig';
 
 const DashAdmin = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    try {
-      // Call the logout API
-      await axiosInstance.post(
-        'http://localhost:5000/api/users/logout', // URL
-        {}, // No body data needed for logout
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }, // Headers with token
-        }
-      );
-  
-      // Dispatch Redux logout action
-      dispatch(logout());
-  
-      // Clear any localStorage token if stored
-      localStorage.removeItem('token');
-  
-      // Navigate to login page
-      navigate('/login');
-    } catch (error) {
-      console.error('Error during logout:', error.response?.data || error.message);
-      alert('Logout failed. Please try again.');
-    }
-  };
-  
-
 
   return (
     <div className="relative min-h-screen bg-white">
@@ -62,12 +30,6 @@ const DashAdmin = () => {
         <h1 className="text-4xl font-bold text-center text-green-700 mb-8">
           Admin Dashboard
         </h1>
-        <button
-            onClick={handleLogout}
-            className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition"
-          >
-            Logout
-          </button>
         <p className="text-center text-lg text-gray-600">
           Manage user profiles, monitor system performance, and more.
         </p>

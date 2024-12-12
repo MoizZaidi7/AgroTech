@@ -1,39 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { logout } from '../Redux/authslice'; // Adjust the path if necessary
-import axiosInstance from '../utils/axiosconfig';
 
 const DashFarmer = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    try {
-      // Call the logout API
-      await axiosInstance.post(
-        'http://localhost:5000/api/users/logout', // URL
-        {}, // No body data needed for logout
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }, // Headers with token
-        }
-      );
   
-      // Dispatch Redux logout action
-      dispatch(logout());
-  
-      // Clear any localStorage token if stored
-      localStorage.removeItem('token');
-  
-      // Navigate to login page
-      navigate('/login');
-    } catch (error) {
-      console.error('Error during logout:', error.response?.data || error.message);
-      alert('Logout failed. Please try again.');
-    }
-  };
-
   return (
     <div className="relative min-h-screen bg-white">
       <div className="absolute inset-0 w-full h-full">
@@ -58,12 +28,6 @@ const DashFarmer = () => {
       >
         <div className="flex justify-between items-center">
           <h1 className="text-4xl font-bold text-green-700 mb-8">Farmer Dashboard</h1>
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition"
-          >
-            Logout
-          </button>
         </div>
         <p className="text-center text-lg text-gray-600">
           Access tools and services tailored for farmers.
