@@ -11,8 +11,9 @@ import ManageUsers from "./pages/manageUsers";
 import Header from "./components/Header.jsx";
 import DashHeader from "./components/DashHeader.jsx";
 import RegisterUserByAdmin from "./pages/RegisterUserByAdmin.jsx";
+import DashFarmer from "./pages/dashboardFarmer.jsx";
 import PublicRoute from "./components/PublicRoute.jsx";
-import DashFarmer from "./components/PrivateRoute.jsx"
+import CropRecommendation from "./pages/CropRecommendation.jsx";
 
 const AppRoutes = () => {
   return useRoutes([
@@ -28,12 +29,12 @@ const AppRoutes = () => {
     {
       path: "/login",
       element: (
-        <PublicRoute>
         <>
+          <PublicRoute>
           <Header />
           <Login />
+          </PublicRoute>
         </>
-        </PublicRoute>
       ),
     },
     {
@@ -103,6 +104,17 @@ const AppRoutes = () => {
           <>
             <DashHeader />
             <DashFarmer />
+          </>
+        </PrivateRoute>
+      ),
+    },
+    {
+      path: "/crop-recommendation",
+      element: (
+        <PrivateRoute roles={["Farmer"]}>
+          <>
+            <DashHeader />
+            <CropRecommendation />
           </>
         </PrivateRoute>
       ),

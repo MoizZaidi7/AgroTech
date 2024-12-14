@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axiosConfig';
 
 const ManageUsers = () => {
@@ -8,7 +7,6 @@ const ManageUsers = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   // Fetch Users
   useEffect(() => {

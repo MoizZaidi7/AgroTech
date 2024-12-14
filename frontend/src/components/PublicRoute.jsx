@@ -3,15 +3,15 @@ import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 const PublicRoute = ({ children }) => {
-  const { isAuthenticated, user } = useSelector(state => state.auth);
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
 
-  // If user is logged in, redirect to their respective dashboard
-  if (isAuthenticated) {
+  // Ensure `user` and `userType` are checked before redirecting
+  if (isAuthenticated && user?.userType) {
     const dashboardPath = getDashboardPath(user.userType);
-    return <Navigate to={dashboardPath} />;
+    return <Navigate to={dashboardPath} replace />;
   }
 
-  // Otherwise, render the child component
+  // Render children if the user is not authenticated
   return children;
 };
 
@@ -25,7 +25,7 @@ const getDashboardPath = (userType) => {
     case 'Customer':
       return '/dashboardcustomer';
     case 'Seller':
-        return '/dashboardseller';
+      return '/dashboardseller';
     default:
       return '/dashboard'; // Default dashboard if no userType matches
   }

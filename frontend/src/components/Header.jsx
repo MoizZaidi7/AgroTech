@@ -11,14 +11,13 @@ const Header = () => {
 
   return (
     <div className="relative">
-        <motion.div
-          className="fixed inset-x-0 top-0 flex justify-between items-center p-2 z-10"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1 }}
-          style={{ backgroundColor: 'transparent', boxShadow: 'none' }}
+    <motion.div
+        className="fixed inset-x-0 top-0 flex justify-between items-center p-2 z-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+        style={{ backgroundColor: "white", boxShadow: "none" }}
       >
-
         {/* Logo Section */}
         <motion.div
           className="flex items-center space-x-2"
