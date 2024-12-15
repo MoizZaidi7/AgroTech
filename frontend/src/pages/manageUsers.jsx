@@ -121,6 +121,7 @@ const ManageUsers = () => {
                 {user.username}
               </h2>
               <p className="text-sm text-gray-600 mt-2">{user.email}</p>
+              <p className="text-sm text-gray-600 mt-2">{user.phoneNumber}</p>
               <p className="text-sm text-gray-600 mt-2">Type: {user.userType}</p>
               <div className="mt-4">
                 <button
@@ -170,6 +171,19 @@ const ManageUsers = () => {
                   name="email"
                   value={selectedUser?.email || ''}
                   onChange={(e) => setSelectedUser({ ...selectedUser, email: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 border rounded-lg"
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700">
+                  Phone Number
+                </label>
+                <input
+                  type="text"
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  value={selectedUser?.phoneNumber || ''}
+                  onChange={(e) => setSelectedUser({ ...selectedUser, phoneNumber: e.target.value })}
                   className="w-full mt-1 px-3 py-2 border rounded-lg"
                 />
               </div>

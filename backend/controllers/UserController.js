@@ -66,14 +66,17 @@ import generatePasswordResetEmail from '../utils/emailTemplates.js';
 };
 
 const updateProfile = async (req, res) => {
-  const { username, email, userType } = req.body;
+  const { firstName, lastName, email, userType, phoneNumber } = req.body;
+
   try {
       const user = await User.findById(req.user.id);
       if (!user) return res.status(404).json({ message: 'User not found' });
 
-      user.username = username || user.username;
+      user.firstName = firstName || user.firstName;
+      user.lastName = lastName || user.lastName;
       user.email = email || user.email;
       user.userType = userType || user.userType;
+      user.phoneNumber = phoneNumber || user.phoneNumber;
 
       const updatedUser = await user.save();
       res.status(200).json({ message: 'Profile updated successfully', user: updatedUser });
@@ -81,6 +84,7 @@ const updateProfile = async (req, res) => {
       res.status(500).json({ message: 'Error updating profile', error });
   }
 };
+
 
 const getUserProfile = async (req, res) => {
     try {

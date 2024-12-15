@@ -8,7 +8,7 @@ import { sendEmail  } from '../utils/sendEmail.js';
 import { generateWelcomeEmail, generateOtpEmail } from '../utils/emailTemplates.js';
 
 const registerUser = async (req, res) => {
-    const { username, email, password, userType, otp } = req.body;
+    const { username, firstName, lastName, email, password, userType, phoneNumber, otp } = req.body;
 
     try {
         // OTP Verification Flow
@@ -16,7 +16,6 @@ const registerUser = async (req, res) => {
             const user = await User.findOne({ email });
             if (!user) return res.status(404).json({ message: 'User not found' });
 
-            // Check if OTP is expired
             if (user.verificationTokenExpire < Date.now()) {
                 await User.findByIdAndDelete(user._id); // Delete expired user
                 return res.status(400).json({ message: 'OTP expired. Please register again.' });
@@ -76,8 +75,11 @@ const registerUser = async (req, res) => {
 
         const newUser = new User({
             username,
+            firstName,
+            lastName,
             email,
             password: hashedPassword,
+            phoneNumber,
             userType,
             verificationToken: hashedOtp,
             verificationTokenExpire: Date.now() + 10 * 60 * 1000, // 10 minutes
@@ -101,45 +103,31 @@ const registerUser = async (req, res) => {
     }
 };
 
-export default registerUser;
-
-
 // Login an existing user
 const loginUser = async (req, res) => {
     const { email, password, rememberMe } = req.body;
 
     try {
-        // Find the user by email
         const user = await User.findOne({ email }).select('+password');
         if (!user) return res.status(404).json({ message: 'User not found' });
 
-        // Ensure the account is active
         if (!user.isActive) {
             return res.status(403).json({ message: 'Account is not active. Please verify your email.' });
         }
 
-        // Check if the user is already logged in
         if (user.isLoggedIn) {
-            console.error('User already logged in:', email);
             return res.status(400).json({ message: 'User is already logged in. Please log out first.' });
         }
 
-        // Check if the password is valid
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) return res.status(400).json({ message: 'Invalid credentials' });
 
-        // Generate JWT token with conditional expiration
         const expiresIn = rememberMe ? '7d' : '1h';
         const token = generateToken(user._id, expiresIn);
 
-         // Update the isLoggedIn status
-         console.log(user);
-         user.isLoggedIn = true;
-         await user.save();
-         console.log(user);
+        user.isLoggedIn = true;
+        await user.save();
 
-
-        // Return the logged-in user and token
         res.status(200).json({
             message: 'Login successful',
             user: { username: user.username, email: user.email, userType: user.userType },
@@ -150,6 +138,7 @@ const loginUser = async (req, res) => {
         res.status(500).json({ message: 'Error logging in', error });
     }
 };
+
 
 const googleLogin = async (req, res) => {
     const { email, googleId, name, profilePicture } = req.body;
@@ -234,4 +223,4 @@ const logoutUser = async (req, res) => {
     }
 };
 
-export { loginUser, registerUser, logoutUser, googleLogin}
+export { loginUser, registerUser, logoutUser, googleLogin} 
