@@ -6,12 +6,14 @@ import userRouter from "./routes/UserRoutes.js";
 import AdminRouter from "./routes/AdminRoutes.js";
 import connectDB from "./config/db.js";
 
+
 // Load environment variables
 dotenv.config();
 
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 5000;
+
 
 // Connect to MongoDB
 connectDB();
@@ -24,6 +26,7 @@ app.use(helmet()); // Secure HTTP headers
 // Routes
 app.use('/api/users', userRouter); // User-related routes
 app.use('/api/admin', AdminRouter); // Admin-specific routes
+
 
 // Default Route
 app.get('/', (req, res) => {

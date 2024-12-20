@@ -16,7 +16,7 @@ const Header = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
-        style={{ backgroundColor: "white", boxShadow: "none" }}
+        style={{ backgroundColor: "transparent", boxShadow: "none" }}
       >
         {/* Logo Section */}
         <motion.div

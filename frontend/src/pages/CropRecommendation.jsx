@@ -7,12 +7,12 @@ const CropRecommendation = () => {
     Nitrogen: '',
     Phosphorus: '',
     Potassium: '',
-    Temperature: '',
-    Humidity: '',
     Ph: '',
     Rainfall: '',
+    location: '', // Location for Weather Analysis
   });
 
+  const [step, setStep] = useState(1); // Track which step (Soil Analysis, Weather Analysis, Crop Recommendation)
   const [result, setResult] = useState('');
   const [error, setError] = useState('');
 
@@ -26,7 +26,7 @@ const CropRecommendation = () => {
     setError(''); // Reset error
 
     try {
-      const response = await axios.post('http://localhost:5001/api/predict', formData, {
+      const response = await axios.post('http://127.0.0.1:5001/api/predict', formData, {
         headers: { 'Content-Type': 'application/json' },
       });
 
@@ -38,6 +38,92 @@ const CropRecommendation = () => {
     } catch (error) {
       console.error('Error:', error);
       setError('An error occurred while fetching the recommendation.');
+    }
+  };
+
+  const renderStepForm = () => {
+    switch (step) {
+      case 1:
+        return (
+          <div>
+            <h2 className="text-2xl font-bold text-gray-700">Soil Analysis</h2>
+            <div className="space-y-4">
+              {['Nitrogen', 'Phosphorus', 'Potassium'].map((field) => (
+                <div key={field}>
+                  <label className="block text-lg font-medium text-gray-700">{field}</label>
+                  <input
+                    type="number"
+                    name={field}
+                    value={formData[field]}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 p-2 w-full border border-gray-300 rounded-md"
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="mt-4">
+              <button type="button" onClick={() => setStep(2)} className="bg-green-600 text-white py-2 px-6 rounded-md hover:bg-green-700 transition">
+                Next: Weather Analysis
+              </button>
+            </div>
+          </div>
+        );
+
+      case 2:
+        return (
+          <div>
+            <h2 className="text-2xl font-bold text-gray-700">Weather Analysis</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-lg font-medium text-gray-700">Location</label>
+                <input
+                  type="text"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleChange}
+                  required
+                  className="mt-1 p-2 w-full border border-gray-300 rounded-md"
+                />
+              </div>
+            </div>
+            <div className="mt-4">
+              <button type="button" onClick={() => setStep(3)} className="bg-green-600 text-white py-2 px-6 rounded-md hover:bg-green-700 transition">
+                Next: Crop Recommendation
+              </button>
+            </div>
+          </div>
+        );
+
+      case 3:
+        return (
+          <div>
+            <h2 className="text-2xl font-bold text-gray-700">Crop Recommendation</h2>
+            <div className="space-y-4">
+              {['Ph', 'Rainfall', 'location'].map((field) => (
+                <div key={field}>
+                  <label className="block text-lg font-medium text-gray-700">{field}</label>
+                  <input
+                    type={field === 'location' ? 'text' : 'number'}
+                    name={field}
+                    value={formData[field]}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 p-2 w-full border border-gray-300 rounded-md"
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="mt-4">
+              <button type="submit" className="bg-green-600 text-white py-2 px-6 rounded-md hover:bg-green-700 transition">
+                Get Recommendation
+              </button>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
     }
   };
 
@@ -55,31 +141,11 @@ const CropRecommendation = () => {
         <p className="text-center text-lg text-gray-600 mb-8">Get the best crop recommendations based on your data.</p>
 
         <form onSubmit={handleSubmit} className="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-md">
-          <div className="space-y-4">
-            {['Nitrogen', 'Phosphorus', 'Potassium', 'Temperature', 'Humidity', 'Ph', 'Rainfall'].map((field) => (
-              <div key={field}>
-                <label className="block text-lg font-medium text-gray-700">{field}</label>
-                <input
-                  type="number"
-                  name={field}
-                  value={formData[field]}
-                  onChange={handleChange}
-                  required
-                  className="mt-1 p-2 w-full border border-gray-300 rounded-md"
-                />
-              </div>
-            ))}
+          {renderStepForm()}
 
-            <div className="mt-4">
-              <button type="submit" className="bg-green-600 text-white py-2 px-6 rounded-md hover:bg-green-700 transition">
-                Get Recommendation
-              </button>
-            </div>
-          </div>
+          {error && <p className="mt-4 text-red-600 text-center">{error}</p>}
+          {result && <p className="mt-4 text-green-700 text-center">{result}</p>}
         </form>
-
-        {error && <p className="mt-4 text-red-600 text-center">{error}</p>}
-        {result && <p className="mt-4 text-green-700 text-center">{result}</p>}
       </motion.div>
     </div>
   );

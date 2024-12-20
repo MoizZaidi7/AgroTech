@@ -11,7 +11,9 @@ import {
 } from '../controllers/AdminController.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 import authorize from '../middleware/authorize.js';
+
 const AdminRouter = express.Router();
+
 AdminRouter.get('/users', authMiddleware, authorize(['Admin']), getRegisteredUsers); // Only Admin can view users
 AdminRouter.put('/users/:userId', authMiddleware, authorize(['Admin']), updateUserDetails); // Only Admin can edit users
 AdminRouter.delete('/users/:userId', authMiddleware, authorize(['Admin']), deleteUser); // Only Admin can delete users

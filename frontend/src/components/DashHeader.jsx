@@ -58,7 +58,7 @@ const DashHeader = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
-        style={{ backgroundColor: "white", boxShadow: "none" }}
+        style={{ backgroundColor: "transparent", boxShadow: "none" }}
       >
         {/* Logo Section */}
         <motion.div
@@ -111,4 +111,4 @@ const DashHeader = () => {
   );
 };
 
-export default DashHeader;
+export default DashHeader; 
