@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion"; // Importing framer-motion
-
+import '../styles/styles.css';
 const Register = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -91,7 +91,7 @@ const Register = () => {
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full">
         <video
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover fixed"
           autoPlay
           loop
           muted
@@ -104,10 +104,10 @@ const Register = () => {
 
       {/* Centered Form Container */}
       <motion.div
-        className="absolute inset-0 flex items-center justify-center"
+        className="absolute inset-0 flex items-center justify-center pt-24" // Added padding to push down the form
       >
         <motion.div
-          className="w-full max-w-md px-6 py-8 rounded-lg shadow-lg"
+          className="w-full max-w-md px-6 py-8 rounded-lg shadow-lg max-h-[80vh] overflow-y-auto invisible-scrollbar" // Applied invisible scrollbar class
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.7, delay: 0.5 }}
@@ -249,37 +249,64 @@ const Register = () => {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 1.7 }}
-              className="relative"
             >
               <label className="block text-sm font-medium mb-2 text-white">User Type</label>
-              <div
-                className="w-full px-4 py-2 text-sm bg-transparent border-b-2 border-white rounded-md text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400 cursor-pointer transition-all duration-500"
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-              >
-                {formData.userType}
-              </div>
-              {dropdownOpen && (
-                <div className="absolute left-0 right-0 mt-1 bg-black bg-opacity-75 border border-white rounded-md shadow-lg z-10 transition-all duration-300">
-                  {["Admin", "Farmer", "Customer", "Seller"].map((type) => (
-                    <div
-                      key={type}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="w-full px-4 py-2 text-sm bg-transparent border-b-2 border-white rounded-md text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all duration-500"
+                >
+                  {formData.userType}
+                </button>
+                {dropdownOpen && (
+                  <ul className="absolute w-full mt-2 bg-white text-black rounded-md shadow-lg">
+                    <li
                       onClick={() => {
-                        setFormData({ ...formData, userType: type });
+                        setFormData({ ...formData, userType: "Farmer" });
                         setDropdownOpen(false);
                       }}
-                      className="px-4 py-2 text-sm text-white hover:bg-green-500 cursor-pointer transition-colors duration-300"
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                     >
-                      {type}
-                    </div>
-                  ))}
-                </div>
-              )}
+                      Farmer
+                    </li>
+                    <li
+                      onClick={() => {
+                        setFormData({ ...formData, userType: "Admin" });
+                        setDropdownOpen(false);
+                      }}
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    >
+                      Admin
+                    </li>
+                    <li
+                      onClick={() => {
+                        setFormData({ ...formData, userType: "Customer" });
+                        setDropdownOpen(false);
+                      }}
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    >
+                      Customer
+                    </li>
+                    <li
+                      onClick={() => {
+                        setFormData({ ...formData, userType: "Seller" });
+                        setDropdownOpen(false);
+                      }}
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    >
+                      Seller
+                    </li>
+                  </ul>
+                )}
+              </div>
             </motion.div>
 
+            {/* Submit Button */}
             <motion.button
               type="submit"
-              className="w-full bg-green-400 text-white py-2 px-4 rounded-md hover:bg-green-500 transition duration-300 ease-in-out"
-              whileHover={{ scale: 1.05 }}
+              disabled={loading}
+              className="w-full px-4 py-2 text-white bg-green-500 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all duration-500"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 1.9 }}
@@ -288,55 +315,38 @@ const Register = () => {
             </motion.button>
           </form>
 
-          <p className="text-center text-sm mt-4 text-white">
-            Already have an account?{" "}
-            <span
-              className="cursor-pointer text-green-400 hover:underline"
-              onClick={() => navigate("/login")}
+          {/* OTP Modal */}
+          {showOtpModal && (
+            <div
+              className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50"
+              onClick={() => setShowOtpModal(false)}
             >
-              Login
-            </span>
-          </p>
+              <div
+                className="bg-white p-6 rounded-lg shadow-lg w-[350px] max-w-full"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h2 className="text-2xl font-bold mb-4">Enter OTP</h2>
+                <input
+                  type="text"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  placeholder="Enter OTP"
+                  className="w-full px-4 py-2 text-sm border-b-2 border-gray-300 rounded-md mb-4"
+                />
+                {otpError && (
+                  <p className="text-red-500 text-sm">{otpError}</p>
+                )}
+                <button
+                  onClick={handleOtpSubmit}
+                  className="w-full py-2 bg-green-500 text-white rounded-md mt-4"
+                >
+                  Verify OTP
+                </button>
+              </div>
+            </div>
+          )}
         </motion.div>
       </motion.div>
-
-      {/* OTP Modal */}
-      {showOtpModal && (
-        <motion.div
-          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <motion.div
-            className="bg-white text-black p-6 rounded-lg shadow-lg w-80"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <h2 className="text-2xl font-bold mb-4 text-center">OTP Verification</h2>
-            {otpError && <p className="text-red-500 mb-4">{otpError}</p>}
-            <input
-              type="text"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              className="w-full px-4 py-2 text-sm border border-gray-300 rounded-md"
-              placeholder="Enter OTP"
-            />
-            <div className="flex justify-center mt-4">
-              <motion.button
-                onClick={handleOtpSubmit}
-                className="bg-green-600 text-white py-2 px-6 rounded-md hover:bg-green-700"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-              >
-                Verify OTP
-              </motion.button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
     </div>
   );
 };

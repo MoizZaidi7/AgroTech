@@ -7,8 +7,6 @@ import { signInWithPopup, GoogleAuthProvider } from "firebase/auth"; // Import G
 import { login } from '../Redux/authslice';
 import { useDispatch } from 'react-redux';
 
-
-
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -17,7 +15,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [rememberMe, setrememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   // Initialize Google Auth Provider
   const provider = new GoogleAuthProvider();
@@ -36,21 +34,19 @@ const Login = () => {
       const { token, expiresIn, user } = response.data;
       localStorage.setItem("token", token);
       localStorage.setItem("expiresIn", expiresIn);
-      localStorage.setItem("user", user);
+      localStorage.setItem("user", JSON.stringify(user));
 
       dispatch(login({ user, token }));
 
-
       alert("Login successful!");
       // Navigate based on user role or type
-    if (user.userType === "Admin") {
-      navigate("/dashboardadmin");
-    } else if (user.userType === "Farmer") {
-      navigate("/dashboardFarmer");
-    } 
-    else {
-      navigate("/dashboard"); // Fallback to a generic dashboard
-    }
+      if (user.userType === "Admin") {
+        navigate("/dashboardadmin");
+      } else if (user.userType === "Farmer") {
+        navigate("/dashboardFarmer");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
       setLoading(false);
@@ -84,19 +80,22 @@ const Login = () => {
 
   return (
     <div className="flex h-screen relative">
-      <div className="absolute inset-0 w-full h-full">
+      {/* Background Video */}
+      <div className="fixed inset-0 w-full h-full z-0">
         <video className="w-full h-full object-cover" autoPlay loop muted playsInline>
           <source src="/backvideo.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
       </div>
 
-      <div className="flex items-center justify-center w-full h-full absolute inset-0">
+      {/* Login Box */}
+      <div className="flex items-center justify-center w-full h-full absolute inset-0 z-10">
         <motion.div
           className="flex flex-col justify-center items-center p-8 rounded-lg shadow-xl w-full max-w-md space-y-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1 }}
+          style={{ marginTop: "5rem" }} // Added margin to move login box down
         >
           <motion.h1
             className="text-3xl font-bold text-center text-white mb-6 drop-shadow-sm"
@@ -173,7 +172,7 @@ const Login = () => {
                 <input
                   type="checkbox"
                   checked={rememberMe}
-                  onChange={() => setrememberMe(!rememberMe)}
+                  onChange={() => setRememberMe(!rememberMe)}
                   className="mr-2"
                 />
                 Remember Me

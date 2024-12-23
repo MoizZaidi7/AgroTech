@@ -109,14 +109,34 @@ def predict():
         prediction = model.predict(final_features)
 
         crop_dict = {
-            1: "Rice", 2: "Maize", 3: "Jute", 4: "Cotton", 5: "Coconut", 6: "Papaya", 7: "Orange",
-            8: "Apple", 9: "Muskmelon", 10: "Watermelon", 11: "Grapes", 12: "Mango", 13: "Banana",
-            14: "Pomegranate", 15: "Lentil", 16: "Blackgram", 17: "Mungbean", 18: "Mothbeans",
-            19: "Pigeonpeas", 20: "Kidneybeans", 21: "Chickpea", 22: "Coffee"
+            1: {"name": "Rice", "image": "rice.jpg"},
+            2: {"name": "Maize", "image": "maize.jpg"},
+            3: {"name": "Jute", "image": "jute.jpg"},
+            4: {"name": "Cotton", "image": "Cotton.jpg"},
+            5: {"name": "Coconut", "image": "Coconut.jpg"},
+            6: {"name": "Papaya", "image": "papaya.jpg"},
+            7: {"name": "Orange", "image": "orange.jpg"},
+            8: {"name": "Apple", "image": "apple.jpg"},
+            9: {"name": "Muskmelon", "image": "muskmelon.jpg"},
+            10: {"name": "Watermelon", "image": "Watermelon.jpg"},
+            11: {"name": "Grapes", "image": "grapes.jpg"},
+            12: {"name": "Mango", "image": "Mango.jpg"},
+            13: {"name": "Banana", "image": "banana.jpg"},
+            14: {"name": "Pomegranate", "image": "pomegranate.jpg"},
+            15: {"name": "Lentil", "image": "lentil.jpg"},
+            16: {"name": "Blackgram", "image": "blackgram.jpg"},
+            17: {"name": "Mungbean", "image": "mungbean.jpg"},
+            18: {"name": "Mothbeans", "image": "mothbeans.jpg"},
+            19: {"name": "Pigeonpeas", "image": "Pigeonpeas.jpg"},
+            20: {"name": "Kidneybeans", "image": "kidneybeans.jpg"},
+            21: {"name": "Chickpea", "image": "chickpea.jpg"},
+            22: {"name": "Coffee", "image": "coffee.jpg"}
         }
 
-        # Get crop name
-        crop = crop_dict.get(prediction[0], "Unknown")
+        # Get crop name and image
+        crop_info = crop_dict.get(prediction[0], {"name": "Unknown", "image": "unknown.jpg"})
+        crop_name = crop_info["name"]
+        crop_image = crop_info["image"]
 
         # Save recommendation to MongoDB
         recommendation_data = {
@@ -130,7 +150,8 @@ def predict():
             "location": location,
             "latitude": latitude,
             "longitude": longitude,
-            "recommendedCrop": crop,
+            "recommendedCrop": crop_name,
+            "cropImage": f"/static/images/{crop_image}",  # Include image path
             "createdAt": datetime.utcnow(),
         }
 

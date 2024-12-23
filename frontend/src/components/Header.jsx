@@ -11,12 +11,12 @@ const Header = () => {
 
   return (
     <div className="relative">
-    <motion.div
-        className="fixed inset-x-0 top-0 flex justify-between items-center p-2 z-10"
+      <motion.div
+        className="fixed inset-x-0 top-0 flex justify-between items-center p-4 z-10"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
-        style={{ backgroundColor: "transparent", boxShadow: "none" }}
+        style={{ backgroundColor: "transparent" }} // Removed the white background
       >
         {/* Logo Section */}
         <motion.div
@@ -28,7 +28,7 @@ const Header = () => {
           <img
             src="/logo.png"
             alt="Logo"
-            className="h-10 w-10 bg-opacity-70 rounded-full border-2 border-white"
+            className="h-10 w-10 rounded-full border-2 border-green-700"
           />
           <div className="flex flex-col">
             <span className="text-green-700 text-xl font-bold">AgroTech</span>
@@ -40,27 +40,33 @@ const Header = () => {
 
         {/* Navigation Links */}
         <motion.div
-          className="flex space-x-4 text-lg text-green-700"
+          className="flex space-x-4 text-lg text-green-700 font-bold tracking-wide"
           initial={{ opacity: 0, x: 100 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1 }}
         >
           <button
             onClick={() => handleNavigationClick("/")}
-            className="hover:text-green-900"
+            className="hover:text-green-900 transform hover:scale-110 transition-transform"
           >
             Home
           </button>
           <button
             onClick={() => handleNavigationClick("/marketplace")}
-            className="hover:text-green-900"
+            className="hover:text-green-900 transform hover:scale-110 transition-transform"
           >
             Marketplace
           </button>
-          <Link to="/support" className="hover:text-green-900">
+          <Link
+            to="/support"
+            className="hover:text-green-900 transform hover:scale-110 transition-transform"
+          >
             Support
           </Link>
-          <Link to="/login" className="hover:text-green-900">
+          <Link
+            to="/login"
+            className="hover:text-green-900 transform hover:scale-110 transition-transform"
+          >
             Login / SignUp
           </Link>
         </motion.div>
