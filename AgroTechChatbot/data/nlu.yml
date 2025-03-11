@@ -1,0 +1,283 @@
+version: "3.1"
+
+nlu:
+- intent: greet
+  examples: |
+    - Hello
+    - Hi
+    - Hey
+    - Hi there!
+    - Good morning
+    - Good afternoon
+    - Greetings
+    - What's up?
+    - Howdy!
+    - Hey, how are you?
+
+- intent: faq_best_season_wheat
+  examples: |
+    - What is the best season to plant wheat?
+    - When is the best time to plant wheat?
+    - Can I grow wheat in summer?
+    - Which months are ideal for wheat farming?
+
+- intent: faq_best_season_rice
+  examples: |
+    - Which season is suitable for growing rice?
+    - When should I plant rice for the best yield?
+    - Can rice be grown in winter?
+    - What is the best climate for rice farming?
+
+- intent: faq_best_season_corn
+  examples: |
+    - When should I plant corn for the best yield?
+    - What is the ideal season to grow corn?
+    - Can I grow corn in winter?
+    - Which weather conditions are best for corn?
+
+- intent: faq_best_season_potato
+  examples: |
+    - Is summer good for growing potatoes?
+    - When should I plant potatoes for the best harvest?
+    - Can I grow potatoes in hot weather?
+    - What is the best time to plant potatoes?
+
+- intent: faq_best_season_carrot
+  examples: |
+    - Can I grow carrots in winter?
+    - Which season is best for planting carrots?
+    - What is the best climate for carrots?
+    - Can carrots grow in hot weather?
+
+- intent: faq_best_crops_rainy_season
+  examples: |
+    - What are the best crops for the rainy season?
+    - Which crops grow well during monsoon?
+    - What vegetables can I plant in heavy rainfall areas?
+    - Can I grow rice in the rainy season?
+
+- intent: faq_best_crops_spring
+  examples: |
+    - Which crops are best to grow in spring?
+    - What vegetables should I plant in spring?
+    - What are the best fruits to grow in spring?
+    - Can I plant flowers in spring?
+
+- intent: faq_best_crops_summer
+  examples: |
+    - What crops are best for summer?
+    - Which vegetables grow well in hot weather?
+    - What are heat-resistant crops for hot climates?
+    - Can I grow tomatoes in summer?
+
+- intent: faq_best_crops_winter
+  examples: |
+    - Which crops should I grow in winter?
+    - What are the best vegetables to plant in cold weather?
+    - Can I grow lettuce in winter?
+    - Which fruits thrive in cold climates?
+
+- intent: faq_best_crops_autumn
+  examples: |
+    - Which crops thrive in autumn?
+    - What vegetables grow best in fall?
+    - Can I plant wheat in autumn?
+    - What are the best fruits to grow in autumn?
+
+- intent: faq_irrigation_methods
+  examples: |
+    - What are different types of irrigation methods?
+    - How does drip irrigation work?
+    - Is sprinkler irrigation better than flood irrigation?
+    - What is the best irrigation system for sandy soil?
+
+- intent: faq_water_wheat
+  examples: |
+    - How much water do wheat crops need?
+    - What is the best watering schedule for wheat?
+    - How often should I irrigate wheat fields?
+    - Can overwatering affect wheat growth?
+
+- intent: faq_water_rice
+  examples: |
+    - How often should I water rice fields?
+    - Does rice need continuous flooding?
+    - What is the ideal water level for rice farming?
+    - Can rice survive in low water conditions?
+
+- intent: faq_water_tomato
+  examples: |
+    - What is the best watering schedule for tomato plants?
+    - How frequently should I water tomatoes?
+    - Can overwatering damage tomato plants?
+    - Is drip irrigation good for tomatoes?
+
+- intent: faq_water_potato
+  examples: |
+    - How much water do potato plants need?
+    - How often should I water potatoes?
+    - Can potatoes tolerate dry conditions?
+    - What is the best irrigation method for potatoes?
+
+- intent: faq_water_corn
+  examples: |
+    - How much water does corn require?
+    - How often should I irrigate corn crops?
+    - Does corn need frequent watering?
+    - What happens if corn is overwatered?
+
+- intent: faq_water_carrot
+  examples: |
+    - How frequently should I water carrots?
+    - What is the best irrigation method for carrots?
+    - Do carrots need a lot of water?
+    - Can overwatering affect carrot growth?
+
+- intent: faq_pest_control
+  examples: |
+    - How can I control pests in my wheat field?
+    - What are common pests in maize crops?
+    - Are there organic ways to control pests in farming?
+    - How do I prevent locust attacks on crops?
+
+- intent: faq_fungal_diseases
+  examples: |
+    - How can I prevent fungal diseases in crops?
+    - What should I do to avoid crop fungal infections?
+    - What is the best way to treat fungal infections in tomato plants?
+    - Can I use organic fungicides for crop protection?
+
+- intent: faq_organic_farming
+  examples: |
+    - What is organic farming?
+    - How does organic farming work?
+    - What are the benefits of organic farming?
+    - Is organic farming more profitable than conventional farming?
+
+- intent: faq_soil_fertility
+  examples: |
+    - How can I improve soil fertility naturally?
+    - What are ways to boost soil fertility?
+    - Which fertilizers are best for enriching soil?
+    - Does soil pH affect fertility?
+
+- intent: faq_precision_agriculture
+  examples: |
+    - What is precision agriculture?
+    - How does precision agriculture work?
+    - What technologies are used in precision farming?
+    - Can drones be used for precision agriculture?
+
+- intent: faq_nitrogen_deficiency
+  examples: |
+    - What are the symptoms of nitrogen deficiency?
+    - How can I fix nitrogen deficiency in crops?
+    - Which fertilizers help with nitrogen deficiency?
+    - How does nitrogen affect plant growth?
+
+- intent: faq_soil_erosion
+  examples: |
+    - What causes soil erosion?
+    - How can I prevent soil erosion on my farm?
+    - What are effective soil conservation methods?
+    - Can planting trees help control soil erosion?
+
+- intent: affirm
+  examples: |
+    - yes
+    - sure
+    - absolutely
+    - correct
+    - that's right
+
+- intent: deny
+  examples: |
+    - no
+    - not really
+    - I don't think so
+    - nope
+
+- intent: bot_challenge
+  examples: |
+    - are you a bot?
+    - who built you?
+    - what is your name?
+
+- intent: goodbye
+  examples: |
+    - goodbye
+    - see you later
+    - bye
+    - take care
+
+- intent: mood_great
+  examples: |
+    - I'm feeling great
+    - I'm happy
+    - Everything is awesome!
+
+- intent: mood_unhappy
+  examples: |
+    - I'm sad
+    - I'm not feeling well
+    - I'm unhappy
+
+- intent: request_irrigation_advice
+  examples: |
+    - How often should I water my crops?
+    - Can you give me irrigation advice?
+    - Best way to irrigate my farm?
+
+- intent: request_soil_analysis
+  examples: |
+    - How do I test my soil?
+    - Can you analyze my soil?
+    - What is the best soil test method?
+
+- intent: faq_best_crops_for_season
+  examples: |
+    - What are the best crops to grow in winter?
+    - What crops are suitable for summer?
+    - Best crops for this season?
+
+- intent: faq_common_pests
+  examples: |
+    - What are common pests in farming?
+    - How to control crop pests?
+    - What insects damage crops?
+
+- intent: faq_control_weeds
+  examples: |
+    - How to control weeds?
+    - Best way to prevent weed growth?
+    - How do farmers deal with weeds?
+
+- intent: faq_crop_yield_factors
+  examples: |
+    - What factors affect crop yield?
+    - How to improve crop production?
+    - What impacts my harvest?
+
+- intent: faq_hydroponic_farming
+  examples: |
+    - What is hydroponic farming?
+    - How does hydroponic farming work?
+    - Is hydroponic farming better than soil farming?
+
+- intent: faq_reduce_water_usage
+  examples: |
+    - How to reduce water usage in farming?
+    - Best water-saving techniques for crops?
+    - How can I save water while farming?
+
+- intent: faq_test_soil_ph
+  examples: |
+    - How to test soil pH?
+    - What pH is best for farming?
+    - How do I know my soil is acidic or alkaline?
+
+- intent: user_message
+  examples: |
+    - I have a question
+    - Can you help me?
+    - I need assistance

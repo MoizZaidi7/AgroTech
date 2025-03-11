@@ -1,0 +1,194 @@
+version: "3.1"
+
+intents:
+  - greet
+  - faq_best_season_wheat
+  - faq_best_season_rice
+  - faq_best_season_corn
+  - faq_best_season_potato
+  - faq_best_season_carrot
+  - faq_best_crops_rainy_season
+  - faq_best_crops_spring
+  - faq_best_crops_summer
+  - faq_best_crops_winter
+  - faq_best_crops_autumn
+  - faq_irrigation_methods
+  - faq_water_wheat
+  - faq_water_rice
+  - faq_water_tomato
+  - faq_water_potato
+  - faq_water_corn
+  - faq_water_carrot
+  - faq_pest_control
+  - faq_fungal_diseases
+  - faq_organic_farming
+  - faq_soil_fertility
+  - faq_precision_agriculture
+  - faq_nitrogen_deficiency
+  - faq_soil_erosion
+  - faq_common_pests
+  - faq_test_soil_ph
+  - faq_control_weeds
+  - faq_hydroponic_farming
+  - faq_crop_yield_factors
+  - faq_reduce_water_usage
+  - faq_best_crops_for_season
+  - user_message
+  - goodbye
+  - mood_great
+  - mood_unhappy
+  - affirm
+  - deny
+  - bot_challenge
+  - request_irrigation_advice
+  - request_soil_analysis
+
+responses:
+  utter_greet:
+    - text: "Hello! How can I assist you today?"
+
+  utter_faq_best_season_wheat:
+    - text: "Wheat grows best in winter with cool temperatures."
+
+  utter_faq_best_season_rice:
+    - text: "Rice thrives in warm, wet conditions, making monsoon season ideal."
+
+  utter_faq_best_season_corn:
+    - text: "Corn grows best in warm weather, making summer the ideal season."
+
+  utter_faq_best_season_potato:
+    - text: "Potatoes prefer cooler temperatures and grow best in spring or autumn."
+
+  utter_faq_best_season_carrot:
+    - text: "Carrots grow well in cool temperatures, making fall and spring ideal."
+
+  utter_faq_water_potato:
+    - text: "It is best to water potatoes up to..."
+
+  utter_faq_best_crops_rainy_season:
+    - text: "Crops like rice, maize, and soybean grow best in the rainy season."
+
+  utter_faq_best_crops_spring:
+    - text: "Spring is ideal for crops like lettuce, spinach, and strawberries."
+
+  utter_faq_best_crops_summer:
+    - text: "Summer crops include corn, tomatoes, and cucumbers, which thrive in warm temperatures."
+
+  utter_faq_best_crops_winter:
+    - text: "Winter crops include cabbage, carrots, and wheat, which grow well in cooler temperatures."
+
+  utter_faq_best_crops_autumn:
+    - text: "Autumn is great for growing pumpkins, beets, and garlic, as they thrive in mild temperatures."
+
+  utter_faq_irrigation_methods:
+    - text: "Common irrigation methods include drip irrigation, sprinkler systems, and flood irrigation."
+
+  utter_faq_water_tomato:
+    - text: "Tomato plants should be watered deeply 2-3 times a week, depending on soil and climate."
+
+  utter_faq_water_corn:
+    - text: "Corn requires about 1 to 1.5 inches of water per week, especially during the pollination period."
+
+  utter_faq_pest_control:
+    - text: "Pests can be controlled using crop rotation, organic pesticides, and biological control methods."
+
+  utter_faq_common_pests:
+    - text: "Common crop pests include aphids, caterpillars, and beetles. Using companion planting and natural predators can help manage them."
+
+  utter_faq_fungal_diseases:
+    - text: "To prevent fungal diseases, ensure good air circulation, avoid overwatering, and use resistant crop varieties."
+
+  utter_faq_organic_farming:
+    - text: "Organic farming avoids synthetic pesticides and fertilizers, focusing on natural growth processes."
+
+  utter_faq_soil_fertility:
+    - text: "Improving soil fertility can be done through composting, crop rotation, and using natural fertilizers."
+
+  utter_faq_precision_agriculture:
+    - text: "Precision agriculture uses technology like GPS and sensors to optimize farming practices."
+
+  utter_faq_nitrogen_deficiency:
+    - text: "Symptoms of nitrogen deficiency include yellowing leaves and stunted growth. Applying nitrogen-rich fertilizers can help."
+
+  utter_faq_sandy_soil_crops:
+    - text: "Crops like carrots, peanuts, and watermelon grow well in sandy soil."
+
+  utter_faq_test_soil_ph:
+    - text: "You can test soil pH using a soil test kit or by sending a sample to a lab."
+
+  utter_faq_control_weeds:
+    - text: "Weeds can be controlled through mulching, crop rotation, and selective herbicide application."
+
+  utter_faq_hydroponic_farming:
+    - text: "Hydroponic farming is a method of growing plants without soil, using nutrient-rich water solutions."
+
+  utter_faq_crop_yield_factors:
+    - text: "Crop yield is influenced by factors such as soil quality, irrigation, climate, and fertilization."
+
+  utter_faq_reduce_water_usage:
+    - text: "Using drip irrigation, mulching, and rainwater harvesting can help reduce water usage in farming."
+
+  utter_faq_best_crops_for_season:
+    - text: "Summer crops include corn and tomatoes, winter crops include wheat and cabbage, and spring crops include carrots and lettuce."
+  utter_faq_water_wheat:
+    - text: "Wheat should be watered every 7-10 days in dry conditions."
+
+  utter_faq_water_rice:
+    - text: "Rice needs to be kept flooded with water for most of its growing cycle."
+
+  utter_faq_water_carrot:
+    - text: "Carrots require deep, consistent watering, about 1 inch per week."
+
+  utter_faq_soil_erosion:
+    - text: "To prevent soil erosion, use cover crops, contour plowing, and mulching."
+
+  utter_goodbye:
+    - text: "Goodbye! Have a great day."
+
+  utter_happy:
+    - text: "I'm happy to hear that! 😊"
+
+  utter_cheer_up:
+    - text: "Don't worry, things will get better. Stay positive!"
+
+  utter_did_that_help:
+    - text: "Did that answer your question?"
+
+  utter_iamabot:
+    - text: "I am an AgroTech AI assistant, here to help you with farming queries."
+
+  utter_request_irrigation_advice:
+    - text: "For irrigation advice, consider your soil type and crop needs. Drip irrigation is efficient for water conservation."
+
+  utter_request_soil_analysis:
+    - text: "Soil testing kits or lab analysis can help determine pH, nutrients, and fertility levels."
+
+  utter_faq_sandy_soil_crops:
+    -text : ""
+
+actions:
+  - action_huggingface_response
+  - utter_greet
+  - utter_faq_best_season_wheat
+  - utter_faq_best_season_rice
+  - utter_faq_best_season_corn
+  - utter_faq_best_season_potato
+  - utter_faq_best_season_carrot
+  - utter_faq_irrigation_methods
+  - utter_faq_water_tomato
+  - utter_faq_water_corn
+  - utter_faq_pest_control
+  - utter_faq_common_pests
+  - utter_faq_fungal_diseases
+  - utter_faq_organic_farming
+  - utter_faq_soil_fertility
+  - utter_faq_precision_agriculture
+  - utter_faq_nitrogen_deficiency
+  - utter_faq_sandy_soil_crops
+  - utter_faq_test_soil_ph
+  - utter_faq_control_weeds
+  - utter_faq_hydroponic_farming
+  - utter_faq_crop_yield_factors
+  - utter_faq_reduce_water_usage
+  - utter_faq_best_crops_for_season
+  - utter_faq_sandy_soil_crops

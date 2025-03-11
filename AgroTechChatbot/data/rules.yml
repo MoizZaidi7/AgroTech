@@ -1,0 +1,167 @@
+version: "3.1"
+
+rules:
+  - rule: Respond to greetings
+    steps:
+      - intent: greet
+      - action: utter_greet
+
+  - rule: Answer best season for wheat question
+    steps:
+      - intent: faq_best_season_wheat
+      - action: utter_faq_best_season_wheat
+
+  - rule: Answer best season for rice question
+    steps:
+      - intent: faq_best_season_rice
+      - action: utter_faq_best_season_rice
+
+  - rule: Answer best season for corn question
+    steps:
+      - intent: faq_best_season_corn
+      - action: utter_faq_best_season_corn
+
+  - rule: Answer best season for potato question
+    steps:
+      - intent: faq_best_season_potato
+      - action: utter_faq_best_season_potato
+
+  - rule: Answer best season for carrot question
+    steps:
+      - intent: faq_best_season_carrot
+      - action: utter_faq_best_season_carrot
+
+  - rule: Answer best crops for rainy season question
+    steps:
+      - intent: faq_best_crops_rainy_season
+      - action: utter_faq_best_crops_rainy_season
+
+  - rule: Answer best crops for spring question
+    steps:
+      - intent: faq_best_crops_spring
+      - action: utter_faq_best_crops_spring
+
+  - rule: Answer best crops for summer question
+    steps:
+      - intent: faq_best_crops_summer
+      - action: utter_faq_best_crops_summer
+
+  - rule: Answer best crops for winter question
+    steps:
+      - intent: faq_best_crops_winter
+      - action: utter_faq_best_crops_winter
+
+  - rule: Answer best crops for autumn question
+    steps:
+      - intent: faq_best_crops_autumn
+      - action: utter_faq_best_crops_autumn
+
+  - rule: Answer irrigation methods question
+    steps:
+      - intent: faq_irrigation_methods
+      - action: utter_faq_irrigation_methods
+
+  - rule: Answer wheat watering question
+    steps:
+      - intent: faq_water_wheat
+      - action: utter_faq_water_wheat
+
+  - rule: Answer rice watering question
+    steps:
+      - intent: faq_water_rice
+      - action: utter_faq_water_rice
+
+  - rule: Answer tomato watering question
+    steps:
+      - intent: faq_water_tomato
+      - action: utter_faq_water_tomato
+
+  - rule: Answer potato watering question
+    steps:
+      - intent: faq_water_potato
+      - action: utter_faq_water_potato
+
+  - rule: Answer corn watering question
+    steps:
+      - intent: faq_water_corn
+      - action: utter_faq_water_corn
+
+  - rule: Answer carrot watering question
+    steps:
+      - intent: faq_water_carrot
+      - action: utter_faq_water_carrot
+
+  - rule: Answer pest control question
+    steps:
+      - intent: faq_pest_control
+      - action: utter_faq_pest_control
+
+  - rule: Answer fungal diseases question
+    steps:
+      - intent: faq_fungal_diseases
+      - action: utter_faq_fungal_diseases
+
+  - rule: Answer organic farming question
+    steps:
+      - intent: faq_organic_farming
+      - action: utter_faq_organic_farming
+
+  - rule: Answer soil fertility question
+    steps:
+      - intent: faq_soil_fertility
+      - action: utter_faq_soil_fertility
+
+  - rule: Answer precision agriculture question
+    steps:
+      - intent: faq_precision_agriculture
+      - action: utter_faq_precision_agriculture
+
+  - rule: Answer nitrogen deficiency question
+    steps:
+      - intent: faq_nitrogen_deficiency
+      - action: utter_faq_nitrogen_deficiency
+
+  - rule: Answer soil erosion question
+    steps:
+      - intent: faq_soil_erosion
+      - action: utter_faq_soil_erosion
+
+  - rule: Answer common pests question
+    steps:
+      - intent: faq_common_pests
+      - action: utter_faq_common_pests
+
+  - rule: Answer soil pH testing question
+    steps:
+      - intent: faq_test_soil_ph
+      - action: utter_faq_test_soil_ph
+
+  - rule: Answer weed control question
+    steps:
+      - intent: faq_control_weeds
+      - action: utter_faq_control_weeds
+
+  - rule: Answer hydroponic farming question
+    steps:
+      - intent: faq_hydroponic_farming
+      - action: utter_faq_hydroponic_farming
+
+  - rule: Answer crop yield factors question
+    steps:
+      - intent: faq_crop_yield_factors
+      - action: utter_faq_crop_yield_factors
+
+  - rule: Answer water usage reduction question
+    steps:
+      - intent: faq_reduce_water_usage
+      - action: utter_faq_reduce_water_usage
+
+  - rule: Answer best crops for the season question
+    steps:
+      - intent: faq_best_crops_for_season
+      - action: utter_faq_best_crops_for_season
+
+  - rule: Respond to user message with Hugging Face
+    steps:
+      - intent: user_message
+      - action: action_huggingface_response

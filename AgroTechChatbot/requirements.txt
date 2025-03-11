@@ -1,0 +1,5 @@
+rasa
+rasa-sdk
+transformers
+huggingface_hub
+torch
