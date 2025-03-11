@@ -1,94 +1,59 @@
 import React from "react";
-import { BrowserRouter as Router, useRoutes } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import PrivateRoute from "./components/PrivateRoute.jsx";
+import PublicRoute from "./components/PublicRoute.jsx";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import Dashboard from "./pages/dashboard";
 import ForgotPassword from "./pages/forgotPassword";
 import ResetPassword from "./pages/resetPassword";
 import DashAdmin from "./pages/dashboardadmin";
+import DashFarmer from "./pages/dashboardFarmer.jsx";
 import Header from "./components/Header.jsx";
 import DashHeader from "./components/DashHeader.jsx";
-import DashFarmer from "./pages/dashboardFarmer.jsx";
-import PublicRoute from "./components/PublicRoute.jsx";
+import { ChatbotWidget } from "./components/ChatBotWidget";
 
 const AppRoutes = () => {
-  return useRoutes([
-    {
-      path: "/",
-      element: (
-        <>
-          <Header />
-          <Dashboard />
-        </>
-      ),
-    },
-    {
-      path: "/login",
-      element: (
-        <>
-          <PublicRoute>
-          <Login />
-          </PublicRoute>
-        </>
-      ),
-    },
-    {
-      path: "/register",
-      element: (
-        <>
-          <Header />
-          <Register />
-        </>
-      ),
-    },
-    {
-      path: "/forgotPassword",
-      element: (
-        <>
-          <Header />
-          <ForgotPassword />
-        </>
-      ),
-    },
-    {
-      path: "/resetPassword",
-      element: (
-        <>
-          <Header />
-          <ResetPassword />
-        </>
-      ),
-    },
-    {
-      path: "/dashboardadmin",
-      element: (
+  return (
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/" element={<><Header /><Dashboard /></>} />
+      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+      <Route path="/register" element={<><Header /><Register /></>} />
+      <Route path="/forgotPassword" element={<><Header /><ForgotPassword /></>} />
+      <Route path="/resetPassword" element={<><Header /><ResetPassword /></>} />
+
+      {/* Private Routes */}
+      <Route path="/dashboardadmin" element={
         <PrivateRoute roles={["Admin"]}>
-          <>
-            <DashHeader />
-            <DashAdmin />
-          </>
+          <><DashHeader /><DashAdmin /></>
         </PrivateRoute>
-      ),
-    },
-    {
-      path: "/dashboardfarmer",
-      element: (
+      }/>
+      <Route path="/dashboardfarmer" element={
         <PrivateRoute roles={["Farmer"]}>
-          <>
-            <DashHeader />
-            <DashFarmer />
-          </>
+          <><DashHeader /><DashFarmer /></>
         </PrivateRoute>
-      ),
-    },
-  ]);
+      }/>
+    </Routes>
+  );
 };
 
-const App = () => (
-  <Router>
-    <AppRoutes />
-  </Router>
-);
+const App = () => {
+  const location = useLocation();
+  const hideChatbotOn = ["/login", "/register", "/forgotPassword", "/resetPassword", "/dashboardadmin"];
 
-export default App;
+  return (
+    <>
+      <AppRoutes />
+      {!hideChatbotOn.includes(location.pathname) && <ChatbotWidget />}
+    </>
+  );
+};
+
+export default function RootApp() {
+  return (
+    <Router>
+      <App />
+    </Router>
+  );
+}

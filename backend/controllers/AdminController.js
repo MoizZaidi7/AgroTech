@@ -74,25 +74,46 @@ const fetchComplaints = async (req, res) => {
 };
 
 const resolveComplaints = async (req, res) => {
-  const { complaintId, action, resolutionText } = req.body; 
   try {
-    const complaint = await Complaint.findById(complaintId);
-    if (!complaint) {
-      return res.status(404).json({ message: 'Complaint not found' });
+    const { complaintId } = req.params;
+    const { status, adminResponse } = req.body;
+
+    console.log("🔹 Resolving Complaint:", { complaintId, status, adminResponse });
+
+    // Check if `status` is valid
+    const validStatuses = ["pending", "in progress", "resolved", "closed"];
+    if (!validStatuses.includes(status.toLowerCase())) {
+      return res.status(400).json({ message: `Invalid status. Must be one of: ${validStatuses.join(", ")}` });
     }
 
-    complaint.status = action; 
-    if (action === 'resolved') {
-      complaint.resolutionText = resolutionText;
-      complaint.resolvedBy = req.user.id; 
+    // Find complaint
+    const complaint = await Complaint.findById(complaintId);
+    if (!complaint) {
+      console.error("❌ Complaint not found:", complaintId);
+      return res.status(404).json({ message: "Complaint not found" });
     }
+
+    // Update complaint status
+    complaint.status = status.toLowerCase();
+    complaint.resolutionText = adminResponse || "Resolved by admin";
+    complaint.resolvedBy = req.user.id;
+    complaint.updatedAt = Date.now(); // Update timestamp
+
     await complaint.save();
-    res.status(200).json({ message: 'Complaint updated successfully', complaint });
+
+    console.log("✅ Complaint Updated Successfully:", complaint);
+
+    return res.status(200).json({
+      message: "Complaint updated successfully",
+      complaint
+    });
+
   } catch (error) {
-    console.error('Error updating complaint:', error);
-    res.status(500).json({ message: 'Error updating complaint. Please try again or contact support.' });
+    console.error("❌ Error resolving complaint:", error);
+    return res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
 
 const generateReport = async (req, res) => {
   const { reportType, filters } = req.body; 

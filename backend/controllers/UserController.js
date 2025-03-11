@@ -3,6 +3,8 @@ import User from '../models/User.js';
 import {sendEmail} from '../utils/sendEmail.js';
 import crypto from 'crypto';
 import generatePasswordResetEmail from '../utils/emailTemplates.js';
+import Complaint from '../models/Complaint.js'; 
+
 
   const forgotPassword = async (req, res) => {
     const { email  } = req.body;
@@ -134,6 +136,45 @@ const deleteUserAccount = async (req, res) => {
   }
 };
 
+const createComplaint = async (req, res) => {
+  try {
+    console.log("Received complaint request:", req.body); // Debugging Step
+
+    const { name, type, details } = req.body;
+
+    if (!name || !type || !details) {
+      return res.status(400).json({ message: "All fields (name, type, details) are required." });
+    }
+
+    const newComplaint = new Complaint({
+      userId: req.user.id, // Assuming `req.user` is set by auth middleware
+      name,
+      type,
+      details,
+      status: "pending",
+    });
+
+    await newComplaint.save();
+    res.status(201).json({ message: "Complaint created successfully", complaint: newComplaint });
+
+  } catch (error) {
+    console.error("Error creating complaint:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 
-  export {forgotPassword, resetPassword, updateProfile, getUserProfile, changePassword, deleteUserAccount};
+const getComplaintsByUser = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const complaints = await Complaint.find({ userId }).sort({ createdAt: -1 });
+    res.status(200).json({ complaints });
+  } catch (error) {
+    console.error('Error fetching complaints:', error);
+    res.status(500).json({ message: 'Error fetching complaints', error });
+  }
+};
+
+
+  export {forgotPassword, resetPassword, updateProfile, getUserProfile, changePassword, deleteUserAccount, createComplaint, getComplaintsByUser};

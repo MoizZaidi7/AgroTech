@@ -1,5 +1,5 @@
 import express from 'express';
-import {forgotPassword, resetPassword, changePassword, updateProfile, deleteUserAccount, getUserProfile} from '../controllers/UserController.js';
+import {forgotPassword, resetPassword, changePassword, updateProfile, deleteUserAccount, getUserProfile, createComplaint, getComplaintsByUser} from '../controllers/UserController.js';
 import { googleLogin, loginUser, logoutUser, registerUser} from '../controllers/AuthController.js';
 import authMiddleware  from '../middleware/authMiddleware.js';
 
@@ -18,4 +18,6 @@ userRouter.put('/profile', authMiddleware, updateProfile);
 userRouter.delete('/delete', authMiddleware, deleteUserAccount); 
 userRouter.post('/logout', authMiddleware, logoutUser); 
 
+userRouter.post('/complaints/create', authMiddleware, createComplaint); 
+userRouter.get('/complaints', authMiddleware, getComplaintsByUser); 
 export default userRouter;

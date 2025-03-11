@@ -43,7 +43,7 @@ const Login = () => {
       if (user.userType === "Admin") {
         navigate("/dashboardadmin");
       } else if (user.userType === "Farmer") {
-        navigate("/dashboardFarmer");
+        navigate("/dashboardfarmer");
       } else {
         navigate("/dashboard");
       }
@@ -69,7 +69,7 @@ const Login = () => {
       });
 
       alert("Google Login successful!");
-      navigate("/dashboard");
+      navigate("/dashboardfarmer");
     } catch (err) {
       console.error("Error during Google Sign-In:", err);
       setError("Failed to sign in with Google. Please try again.");

@@ -7,6 +7,7 @@ const DashAdmin = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeSection, setActiveSection] = useState('Manage Users');
+  const [complaintTab, setComplaintTab] = useState('Active'); // 'Active' or 'Resolved'
 
   // Register User States
   const [registerForm, setRegisterForm] = useState({
@@ -17,6 +18,14 @@ const DashAdmin = () => {
   });
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+
+  // Complaints States
+  const [complaints, setComplaints] = useState([]);
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
+  const [isComplaintModalOpen, setIsComplaintModalOpen] = useState(false);
+  const [complaintStatus, setComplaintStatus] = useState('Pending');
+  const [complaintResponse, setComplaintResponse] = useState('');
+  const [updateError, setUpdateError] = useState('');
 
   // Fetch Users
   useEffect(() => {
@@ -34,6 +43,34 @@ const DashAdmin = () => {
       fetchUsers();
     }
   }, [activeSection]);
+
+  useEffect(() => {
+    if (activeSection === "Manage Complaints") {
+      fetchComplaints();
+    }
+  }, [activeSection]);
+   
+  // Separate function to fetch complaints for reuse
+  const fetchComplaints = async () => {
+    setLoading(true); // Show loading while fetching complaints
+
+    try {
+      const response = await axiosInstance.get("http://localhost:5000/api/admin/complaints", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+
+      if (response.status === 200) {
+        console.log("Received complaints:", response.data.complaints);
+        setComplaints(response.data.complaints);
+      } else {
+        console.error("Failed to fetch complaints:", response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching complaints:", error.response?.data || error.message);
+    } finally {
+      setLoading(false); // Hide loading indicator
+    }
+  };
 
   // Handle Register User
   const handleRegisterUser = async (e) => {
@@ -115,10 +152,93 @@ const DashAdmin = () => {
     }
   };
 
+  // Handle Update Complaint Status
+  const handleUpdateComplaintStatus = async (e) => {
+    e.preventDefault(); // Prevent form submission refresh
+    if (!selectedComplaint) return;
+    
+    setLoading(true);
+    setUpdateError('');
+
+    // Log the data we're about to send
+    console.log("Updating complaint:", selectedComplaint._id);
+    console.log("New status:", complaintStatus);
+    console.log("Admin response:", complaintResponse);
+
+    try {
+      const requestData = { 
+        status: complaintStatus 
+      };
+      
+      // Only include adminResponse if it has content
+      if (complaintResponse.trim()) {
+        requestData.adminResponse = complaintResponse;
+      }
+      
+      console.log("Request data:", requestData);
+      
+      const response = await axiosInstance.put(
+        `http://localhost:5000/api/admin/complaints/${selectedComplaint._id}`,
+        requestData,
+        {
+          headers: { 
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          },
+        }
+      );
+
+      console.log("Update response:", response);
+
+      if (response.status === 200) {
+        // Refresh complaints from server instead of updating locally
+        await fetchComplaints();
+        setIsComplaintModalOpen(false);
+        alert('Complaint status updated successfully');
+      }
+    } catch (error) {
+      console.error('Error updating complaint status:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to update complaint status. Please try again.';
+      setUpdateError(errorMessage);
+      alert(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Get username by userId
+  const getUsernameById = (userId) => {
+    const user = users.find(user => user._id === userId);
+    return user ? user.username : 'Unknown User';
+  };
+
   const sidebarItems = [
     { title: 'Manage Users' },
     { title: 'Register User' },
+    { title: 'Manage Complaints' },
   ];
+
+  // Fixed filtering of complaints based on status - ensure case insensitive comparison
+  const getFilteredComplaints = () => {
+    // First check if there are any complaints to filter
+    if (!complaints || complaints.length === 0) {
+      return { activeComplaints: [], resolvedComplaints: [] };
+    }
+    
+    // Filter with case-insensitive check
+    const resolvedComplaints = complaints.filter(complaint => 
+      complaint.status && complaint.status.toLowerCase() === 'resolved'
+    );
+    
+    const activeComplaints = complaints.filter(complaint => 
+      !complaint.status || complaint.status.toLowerCase() !== 'resolved'
+    );
+    
+    return { activeComplaints, resolvedComplaints };
+  };
+  
+  // Get filtered complaints based on current tab
+  const { activeComplaints, resolvedComplaints } = getFilteredComplaints();
 
   const renderContent = () => {
     switch (activeSection) {
@@ -301,6 +421,269 @@ const DashAdmin = () => {
                 </button>
               </div>
             </form>
+          </div>
+        );
+      case 'Manage Complaints':
+        return (
+          <div className="relative z-0 pt-32 px-6 py-8">
+            <h1 className="text-4xl font-bold text-center text-white mb-8">
+              Manage Complaints
+            </h1>
+            <p className="text-center text-lg text-gray-200">
+              View and manage all complaints submitted by users.
+            </p>
+
+            {/* Tab Navigation */}
+            <div className="flex justify-center mt-8 bg-white rounded-lg p-1 max-w-md mx-auto">
+              <button
+                className={`px-4 py-2 rounded-lg ${
+                  complaintTab === 'Active'
+                    ? 'bg-green-600 text-white'
+                    : 'text-green-700 hover:bg-green-50'
+                }`}
+                onClick={() => setComplaintTab('Active')}
+              >
+                Active Complaints
+              </button>
+              <button
+                className={`px-4 py-2 rounded-lg ${
+                  complaintTab === 'Resolved'
+                    ? 'bg-green-600 text-white'
+                    : 'text-green-700 hover:bg-green-50'
+                }`}
+                onClick={() => setComplaintTab('Resolved')}
+              >
+                Resolved Complaints
+              </button>
+            </div>
+
+            {loading ? (
+              <div className="flex justify-center mt-8">
+                <div className="bg-white p-4 rounded-md">
+                  <p className="text-green-700">Loading complaints...</p>
+                </div>
+              </div>
+            ) : complaintTab === 'Active' ? (
+              // Active Complaints Section
+              activeComplaints.length === 0 ? (
+                <div className="flex justify-center mt-8">
+                  <div className="bg-white p-4 rounded-md">
+                    <p className="text-green-700">No active complaints found.</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {activeComplaints.map(complaint => (
+                    <div
+                      key={complaint._id}
+                      className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+                    >
+                      <div className="flex justify-between items-start">
+                        <h2 className="text-xl font-semibold text-green-700">
+                          {complaint.name || 'No Title'}
+                        </h2>
+                        <span className={`px-2 py-1 text-xs rounded-full ${
+                          complaint.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {complaint.status || 'Pending'}
+                        </span>
+                      </div>
+                      
+                      <p className="text-sm text-gray-600 mt-2 font-semibold">
+                        Submitted by: {complaint.userId ? getUsernameById(complaint.userId) : 'Unknown User'}
+                      </p>
+                      
+                      <p className="text-sm text-gray-600 mt-2">
+                        <span className="font-medium">Type:</span> {complaint.type || 'General'}
+                      </p>
+                      
+                      <div className="mt-3 p-3 bg-gray-50 rounded-md">
+                        <p className="text-sm text-gray-700">{complaint.description || 'No description provided'}</p>
+                      </div>
+                      
+                      {complaint.adminResponse && (
+                        <div className="mt-3">
+                          <p className="text-xs text-gray-500 mb-1">Admin Response:</p>
+                          <div className="p-3 bg-green-50 rounded-md">
+                            <p className="text-sm text-gray-700">{complaint.adminResponse}</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="mt-4">
+                        <p className="text-xs text-gray-500">
+                          Submitted: {complaint.createdAt ? new Date(complaint.createdAt).toLocaleDateString() : 'Unknown date'}
+                        </p>
+                        {complaint.updatedAt && complaint.updatedAt !== complaint.createdAt && (
+                          <p className="text-xs text-gray-500">
+                            Last Updated: {new Date(complaint.updatedAt).toLocaleDateString()}
+                          </p>
+                        )}
+                      </div>
+                      
+                      <div className="mt-4">
+                        <button
+                          className="bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700"
+                          onClick={() => {
+                            setSelectedComplaint(complaint);
+                            setComplaintStatus(complaint.status || 'Pending');
+                            setComplaintResponse(complaint.adminResponse || '');
+                            setIsComplaintModalOpen(true);
+                          }}
+                        >
+                          Update Status
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            ) : (
+              // Resolved Complaints Section
+              resolvedComplaints.length === 0 ? (
+                <div className="flex justify-center mt-8">
+                  <div className="bg-white p-4 rounded-md">
+                    <p className="text-green-700">No resolved complaints found.</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {resolvedComplaints.map(complaint => (
+                    <div
+                      key={complaint._id}
+                      className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+                    >
+                      <div className="flex justify-between items-start">
+                        <h2 className="text-xl font-semibold text-green-700">
+                          {complaint.name || 'No Title'}
+                        </h2>
+                        <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                          {complaint.status}
+                        </span>
+                      </div>
+                      
+                      <p className="text-sm text-gray-600 mt-2 font-semibold">
+                        Submitted by: {complaint.userId ? getUsernameById(complaint.userId) : 'Unknown User'}
+                      </p>
+                      
+                      <p className="text-sm text-gray-600 mt-2">
+                        <span className="font-medium">Type:</span> {complaint.type || 'General'}
+                      </p>
+                      
+                      <div className="mt-3 p-3 bg-gray-50 rounded-md">
+                        <p className="text-sm text-gray-700">{complaint.description || 'No description provided'}</p>
+                      </div>
+                      
+                      {complaint.adminResponse && (
+                        <div className="mt-3">
+                          <p className="text-xs text-gray-500 mb-1">Admin Response:</p>
+                          <div className="p-3 bg-green-50 rounded-md">
+                            <p className="text-sm text-gray-700">{complaint.adminResponse}</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="mt-4">
+                        <p className="text-xs text-gray-500">
+                          Submitted: {complaint.createdAt ? new Date(complaint.createdAt).toLocaleDateString() : 'Unknown date'}
+                        </p>
+                        {complaint.updatedAt && complaint.updatedAt !== complaint.createdAt && (
+                          <p className="text-xs text-gray-500">
+                            Last Updated: {new Date(complaint.updatedAt).toLocaleDateString()}
+                          </p>
+                        )}
+                      </div>
+                      
+                      <div className="mt-4">
+                        <button
+                          className="bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700"
+                          onClick={() => {
+                            setSelectedComplaint(complaint);
+                            setComplaintStatus(complaint.status);
+                            setComplaintResponse(complaint.adminResponse || '');
+                            setIsComplaintModalOpen(true);
+                          }}
+                        >
+                          View Details
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            )}
+
+            {/* Modal for Updating Complaint Status */}
+            {isComplaintModalOpen && selectedComplaint && (
+              <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+                <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+                  <h2 className="text-xl font-semibold mb-4 text-gray-800">Update Complaint Status</h2>
+                  
+                  <div className="mb-4">
+                    <h3 className="font-medium text-gray-700">Complaint Details</h3>
+                    <p className="text-sm text-gray-600">{selectedComplaint.title || 'No Title'}</p>
+                    <p className="text-sm text-gray-600 mt-1">
+                      By: {selectedComplaint.userId ? getUsernameById(selectedComplaint.userId) : 'Unknown User'}
+                    </p>
+                    {selectedComplaint._id && (
+                      <p className="text-xs text-gray-500 mt-1">Complaint ID: {selectedComplaint._id}</p>
+                    )}
+                  </div>
+                  
+                  {updateError && (
+                    <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
+                      {updateError}
+                    </div>
+                  )}
+                  
+                  <form onSubmit={handleUpdateComplaintStatus}>
+                    <div className="mb-4">
+                      <label className="block text-gray-700">Status</label>
+                      <select
+                        value={complaintStatus}
+                        onChange={(e) => setComplaintStatus(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-md text-black"
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Resolved">Resolved</option>
+                      </select>
+                    </div>
+                    
+                    <div className="mb-4">
+                      <label className="block text-gray-700">Admin Response</label>
+                      <textarea
+                        value={complaintResponse}
+                        onChange={(e) => setComplaintResponse(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-md text-black h-32"
+                        placeholder="Enter your response to this complaint..."
+                      />
+                    </div>
+                    
+                    <div className="mt-6 flex justify-between">
+                      <button
+                        type="button"
+                        className="bg-red-600 text-white p-2 rounded-md"
+                        onClick={() => {
+                          setIsComplaintModalOpen(false);
+                          setUpdateError('');
+                        }}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="bg-green-600 text-white p-2 rounded-md"
+                        disabled={loading}
+                      >
+                        {loading ? 'Updating...' : 'Update Status'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
           </div>
         );
       default:
