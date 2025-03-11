@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/Crop-Recommendation-System-Using-Machine-Learning-main.iml" filepath="$PROJECT_DIR$/.idea/Crop-Recommendation-System-Using-Machine-Learning-main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/Crop_and_Fertilizer_Recommendation_System.iml" filepath="$PROJECT_DIR$/.idea/Crop_and_Fertilizer_Recommendation_System.iml" />
     </modules>
   </component>
 </project>

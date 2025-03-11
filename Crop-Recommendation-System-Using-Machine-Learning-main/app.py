@@ -1,30 +1,25 @@
+
 from flask import Flask, request, jsonify
 import numpy as np
-import pickle
+import joblib
 from pymongo import MongoClient
 from datetime import datetime
 from flask_cors import CORS
 import requests
+import os
 
-# Flask app setup
+# Initialize Flask app
 app = Flask(__name__)
 CORS(app)
 
-# Load models
+# Load trained model and scaler using joblib
 try:
-    model = pickle.load(open("model.pkl", "rb"))
-    print(f"✅ Model loaded: {type(model)}")
+    model = joblib.load("crop_prediction_model.pkl")
+    scaler = joblib.load("crop_scaler.pkl")
+    print("✅ Model and scaler loaded successfully.")
 except Exception as e:
-    print(f"❌ Error loading model: {e}")
-    model = None
-
-# Load scalers
-try:
-    sc = pickle.load(open("standscaler.pkl", "rb"))
-    ms = pickle.load(open("minmaxscaler.pkl", "rb"))
-except Exception as e:
-    print(f"❌ Error loading scalers: {e}")
-    sc = ms = None
+    print(f"❌ Error loading model/scaler: {e}")
+    model = scaler = None
 
 # MongoDB connection
 try:
@@ -36,8 +31,8 @@ except Exception as e:
     print(f"❌ Error connecting to MongoDB: {e}")
 
 # API Keys (Replace with your own)
-GOOGLE_MAPS_API_KEY = "YOUR_GOOGLE_MAPS_API_KEY"
-OPENCAGE_API_KEY = "YOUR_OPENCAGE_API_KEY"
+GOOGLE_MAPS_API_KEY = "AIzaSyAul5d2P43ED8RbSgfsFiTgmPoeneYyuOk"
+OPENCAGE_API_KEY = "4dcfa6259a9f4a0cb013f631eb02df50"
 
 
 def reverse_geocode(lat, lng):
@@ -46,7 +41,7 @@ def reverse_geocode(lat, lng):
     response = requests.get(url)
     data = response.json()
 
-    if data['status'] == 'OK':
+    if data.get('status') == 'OK' and data.get('results'):
         return data['results'][0]['formatted_address']
     return None
 
@@ -64,12 +59,40 @@ def get_latitude_longitude(location):
     return None, None
 
 
-@app.route('/api/predict', methods=["POST"])
-def predict():
-    if model is None or sc is None or ms is None:
-        return jsonify({"success": False, "message": "Model or scalers not loaded properly"}), 500
+# Crop dictionary with images
+crop_dict = {
+    1: {"name": "Rice", "image": "rice.jpg"},
+    2: {"name": "Maize", "image": "maize.jpg"},
+    3: {"name": "Chickpea", "image": "chickpea.jpg"},
+    4: {"name": "Kidneybeans", "image": "kidneybeans.jpg"},
+    5: {"name": "Pigeonpeas", "image": "pigeonpeas.jpg"},
+    6: {"name": "Mothbeans", "image": "mothbeans.jpg"},
+    7: {"name": "Mungbean", "image": "mungbean.jpg"},
+    8: {"name": "Blackgram", "image": "blackgram.jpg"},
+    9: {"name": "Lentil", "image": "lentil.jpg"},
+    10: {"name": "Pomegranate", "image": "pomegranate.jpg"},
+    11: {"name": "Banana", "image": "banana.jpg"},
+    12: {"name": "Mango", "image": "mango.jpg"},
+    13: {"name": "Grapes", "image": "grapes.jpg"},
+    14: {"name": "Watermelon", "image": "watermelon.jpg"},
+    15: {"name": "Muskmelon", "image": "muskmelon.jpg"},
+    16: {"name": "Apple", "image": "apple.jpg"},
+    17: {"name": "Orange", "image": "orange.jpg"},
+    18: {"name": "Papaya", "image": "papaya.jpg"},
+    19: {"name": "Coconut", "image": "coconut.jpg"},
+    20: {"name": "Cotton", "image": "cotton.jpg"},
+    21: {"name": "Jute", "image": "jute.jpg"},
+    22: {"name": "Coffee", "image": "coffee.jpg"}
+}
+
+
+@app.route("/api/predict", methods=["POST"])
+def predict_crop():
+    if model is None or scaler is None:
+        return jsonify({"success": False, "message": "Model or scaler not loaded properly"}), 500
 
     try:
+        # Parse request JSON
         data = request.json
         N = float(data["Nitrogen"])
         P = float(data["Phosphorus"])
@@ -93,48 +116,24 @@ def predict():
         params = {
             "latitude": latitude,
             "longitude": longitude,
-            "current": ["temperature_2m", "relative_humidity_2m"]
+            "current": "temperature_2m,relative_humidity_2m"
         }
         response = requests.get(weather_url, params=params)
+
         if response.status_code == 200:
-            weather_data = response.json()
-            temp = weather_data["current"]["temperature_2m"]
-            humidity = weather_data["current"]["relative_humidity_2m"]
+            weather_data = response.json().get("current", {})
+            temp = weather_data.get("temperature_2m", None)
+            humidity = weather_data.get("relative_humidity_2m", None)
+            if temp is None or humidity is None:
+                return jsonify({"success": False, "message": "Incomplete weather data"}), 500
         else:
             return jsonify({"success": False, "message": "Failed to fetch weather data"}), 500
 
-        # Feature processing
+        # Prepare input for model
         feature_list = [N, P, K, temp, humidity, ph, rainfall]
         single_pred = np.array(feature_list).reshape(1, -1)
-        scaled_features = ms.transform(single_pred)
-        final_features = sc.transform(scaled_features)
-        prediction = model.predict(final_features)
-
-        # Crop dictionary
-        crop_dict = {
-            1: {"name": "Rice", "image": "rice.jpg"},
-            2: {"name": "Maize", "image": "maize.jpg"},
-            3: {"name": "Jute", "image": "jute.jpg"},
-            4: {"name": "Cotton", "image": "Cotton.jpg"},
-            5: {"name": "Coconut", "image": "Coconut.jpg"},
-            6: {"name": "Papaya", "image": "papaya.jpg"},
-            7: {"name": "Orange", "image": "orange.jpg"},
-            8: {"name": "Apple", "image": "apple.jpg"},
-            9: {"name": "Muskmelon", "image": "muskmelon.jpg"},
-            10: {"name": "Watermelon", "image": "Watermelon.jpg"},
-            11: {"name": "Grapes", "image": "grapes.jpg"},
-            12: {"name": "Mango", "image": "Mango.jpg"},
-            13: {"name": "Banana", "image": "banana.jpg"},
-            14: {"name": "Pomegranate", "image": "pomegranate.jpg"},
-            15: {"name": "Lentil", "image": "lentil.jpg"},
-            16: {"name": "Blackgram", "image": "blackgram.jpg"},
-            17: {"name": "Mungbean", "image": "mungbean.jpg"},
-            18: {"name": "Mothbeans", "image": "mothbeans.jpg"},
-            19: {"name": "Pigeonpeas", "image": "Pigeonpeas.jpg"},
-            20: {"name": "Kidneybeans", "image": "kidneybeans.jpg"},
-            21: {"name": "Chickpea", "image": "chickpea.jpg"},
-            22: {"name": "Coffee", "image": "coffee.jpg"}
-        }
+        scaled_features = scaler.transform(single_pred)
+        prediction = model.predict(scaled_features)
 
         # Get crop name and image
         crop_info = crop_dict.get(prediction[0], {"name": "Unknown", "image": "unknown.jpg"})
@@ -161,6 +160,7 @@ def predict():
         crop_recommendations_collection.insert_one(recommendation_data)
         recommendation_data["_id"] = str(recommendation_data["_id"])
 
+        # Response
         return jsonify({"success": True, "message": "Crop recommendation saved", "data": recommendation_data}), 200
 
     except Exception as e:
