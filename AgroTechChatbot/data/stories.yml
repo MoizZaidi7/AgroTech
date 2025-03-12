@@ -121,10 +121,6 @@ stories:
     - intent: faq_soil_erosion
     - action: utter_faq_soil_erosion
 
-- story: Respond to user input using Hugging Face
-  steps:
-    - intent: user_message
-    - action: action_huggingface_response
 - story: User greeting
   steps:
     - intent: greet
@@ -170,3 +166,9 @@ stories:
   steps:
     - intent: request_soil_analysis
     - action: utter_request_soil_analysis
+
+- story: AI Query Handling
+  steps:
+    - intent: ai_query
+    - action: action_huggingface_response
+    - action: utter_ask_anything

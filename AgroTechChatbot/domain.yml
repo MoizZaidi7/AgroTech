@@ -42,6 +42,7 @@ intents:
   - bot_challenge
   - request_irrigation_advice
   - request_soil_analysis
+  - ai_query
 
 responses:
   utter_greet:
@@ -62,9 +63,6 @@ responses:
   utter_faq_best_season_carrot:
     - text: "Carrots grow well in cool temperatures, making fall and spring ideal."
 
-  utter_faq_water_potato:
-    - text: "It is best to water potatoes up to..."
-
   utter_faq_best_crops_rainy_season:
     - text: "Crops like rice, maize, and soybean grow best in the rainy season."
 
@@ -83,17 +81,26 @@ responses:
   utter_faq_irrigation_methods:
     - text: "Common irrigation methods include drip irrigation, sprinkler systems, and flood irrigation."
 
+  utter_faq_water_wheat:
+    - text: "Wheat should be watered every 7-10 days in dry conditions."
+
+  utter_faq_water_rice:
+    - text: "Rice needs to be kept flooded with water for most of its growing cycle."
+
   utter_faq_water_tomato:
     - text: "Tomato plants should be watered deeply 2-3 times a week, depending on soil and climate."
+
+  utter_faq_water_potato:
+    - text: "Potatoes require consistent moisture, especially during tuber formation."
 
   utter_faq_water_corn:
     - text: "Corn requires about 1 to 1.5 inches of water per week, especially during the pollination period."
 
+  utter_faq_water_carrot:
+    - text: "Carrots require deep, consistent watering, about 1 inch per week."
+
   utter_faq_pest_control:
     - text: "Pests can be controlled using crop rotation, organic pesticides, and biological control methods."
-
-  utter_faq_common_pests:
-    - text: "Common crop pests include aphids, caterpillars, and beetles. Using companion planting and natural predators can help manage them."
 
   utter_faq_fungal_diseases:
     - text: "To prevent fungal diseases, ensure good air circulation, avoid overwatering, and use resistant crop varieties."
@@ -110,8 +117,11 @@ responses:
   utter_faq_nitrogen_deficiency:
     - text: "Symptoms of nitrogen deficiency include yellowing leaves and stunted growth. Applying nitrogen-rich fertilizers can help."
 
-  utter_faq_sandy_soil_crops:
-    - text: "Crops like carrots, peanuts, and watermelon grow well in sandy soil."
+  utter_faq_soil_erosion:
+    - text: "To prevent soil erosion, use cover crops, contour plowing, and mulching."
+
+  utter_faq_common_pests:
+    - text: "Common pests include aphids, caterpillars, and beetles. Use natural predators and organic pesticides to control them."
 
   utter_faq_test_soil_ph:
     - text: "You can test soil pH using a soil test kit or by sending a sample to a lab."
@@ -130,17 +140,6 @@ responses:
 
   utter_faq_best_crops_for_season:
     - text: "Summer crops include corn and tomatoes, winter crops include wheat and cabbage, and spring crops include carrots and lettuce."
-  utter_faq_water_wheat:
-    - text: "Wheat should be watered every 7-10 days in dry conditions."
-
-  utter_faq_water_rice:
-    - text: "Rice needs to be kept flooded with water for most of its growing cycle."
-
-  utter_faq_water_carrot:
-    - text: "Carrots require deep, consistent watering, about 1 inch per week."
-
-  utter_faq_soil_erosion:
-    - text: "To prevent soil erosion, use cover crops, contour plowing, and mulching."
 
   utter_goodbye:
     - text: "Goodbye! Have a great day."
@@ -163,8 +162,8 @@ responses:
   utter_request_soil_analysis:
     - text: "Soil testing kits or lab analysis can help determine pH, nutrients, and fertility levels."
 
-  utter_faq_sandy_soil_crops:
-    -text : ""
+  utter_ask_anything:
+    - text: "Feel free to ask me anything about farming, crops, or agricultural techniques!"
 
 actions:
   - action_huggingface_response
@@ -175,8 +174,12 @@ actions:
   - utter_faq_best_season_potato
   - utter_faq_best_season_carrot
   - utter_faq_irrigation_methods
+  - utter_faq_water_wheat
+  - utter_faq_water_rice
   - utter_faq_water_tomato
+  - utter_faq_water_potato
   - utter_faq_water_corn
+  - utter_faq_water_carrot
   - utter_faq_pest_control
   - utter_faq_common_pests
   - utter_faq_fungal_diseases
@@ -184,11 +187,11 @@ actions:
   - utter_faq_soil_fertility
   - utter_faq_precision_agriculture
   - utter_faq_nitrogen_deficiency
-  - utter_faq_sandy_soil_crops
+  - utter_faq_soil_erosion
   - utter_faq_test_soil_ph
   - utter_faq_control_weeds
   - utter_faq_hydroponic_farming
   - utter_faq_crop_yield_factors
   - utter_faq_reduce_water_usage
   - utter_faq_best_crops_for_season
-  - utter_faq_sandy_soil_crops
+  - utter_ask_anything

@@ -55,8 +55,12 @@ const ChatbotWidget = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/webhooks/rest/webhook`, { message: input });
-      
+      // Directly specify the Rasa server URL
+      const response = await axios.post(
+        "http://localhost:5002/webhooks/rest/webhook", // Replace with your Rasa server URL
+        { sender: "user", message: input } // Ensure the payload matches Rasa's expected format
+      );
+
       if (response.data.length > 0) {
         const botReplies = response.data.map((res) => ({
           sender: "bot",
@@ -76,17 +80,17 @@ const ChatbotWidget = () => {
 
   const submitComplaint = async (e) => {
     e.preventDefault();
-  
+
     if (!complaintDetails.name || !complaintDetails.type || !complaintDetails.details) {
       alert("Please fill all fields to submit a complaint.");
       return;
     }
-  
+
     console.log("Submitting complaint:", complaintDetails); // Debugging Step
-  
+
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/users/complaints/create`, // Ensure Correct Route
+        "http://localhost:5000/api/users/complaints/create", // Replace with your backend URL
         complaintDetails,
         {
           headers: {
@@ -95,7 +99,7 @@ const ChatbotWidget = () => {
           }
         }
       );
-  
+
       if (response.status === 201) {
         alert("Your complaint has been logged. Thank you!");
         setMessages([...messages, { sender: "bot", text: "Your complaint has been logged. Thank you!" }]);
@@ -109,14 +113,13 @@ const ChatbotWidget = () => {
       alert(`Error: ${error.response?.data?.message || "Something went wrong. Please try again."}`);
     }
   };
-  
 
   // Handle tracking complaint
   const trackComplaint = async () => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/users/complaints`, // Corrected URL
+        "http://localhost:5000/api/users/complaints", // Replace with your backend URL
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,

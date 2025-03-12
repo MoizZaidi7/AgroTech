@@ -161,7 +161,8 @@ rules:
       - intent: faq_best_crops_for_season
       - action: utter_faq_best_crops_for_season
 
-  - rule: Respond to user message with Hugging Face
+  - rule: Respond to AI Queries with Hugging Face
     steps:
-      - intent: user_message
+      - intent: ai_query
       - action: action_huggingface_response
+      - action: utter_ask_anything

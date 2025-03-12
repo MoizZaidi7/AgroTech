@@ -13,6 +13,11 @@ nlu:
     - What's up?
     - Howdy!
     - Hey, how are you?
+    - Hello there
+    - Hi, how can you help me?
+    - Good day!
+    - Hey, what's new?
+    - Hi, nice to meet you!
 
 - intent: faq_best_season_wheat
   examples: |
@@ -20,6 +25,12 @@ nlu:
     - When is the best time to plant wheat?
     - Can I grow wheat in summer?
     - Which months are ideal for wheat farming?
+    - Is winter suitable for wheat cultivation?
+    - Can wheat grow in rainy seasons?
+    - What climate is best for wheat?
+    - When should I sow wheat seeds?
+    - Is autumn a good time for wheat farming?
+    - Can wheat tolerate frost?
 
 - intent: faq_best_season_rice
   examples: |
@@ -27,6 +38,12 @@ nlu:
     - When should I plant rice for the best yield?
     - Can rice be grown in winter?
     - What is the best climate for rice farming?
+    - Is monsoon the best time for rice?
+    - Can rice grow in dry climates?
+    - What temperature is ideal for rice?
+    - When is the rice planting season?
+    - Can I grow rice in spring?
+    - Does rice need a lot of water?
 
 - intent: faq_best_season_corn
   examples: |
@@ -34,6 +51,12 @@ nlu:
     - What is the ideal season to grow corn?
     - Can I grow corn in winter?
     - Which weather conditions are best for corn?
+    - Is summer the best time for corn?
+    - Can corn grow in cold climates?
+    - What temperature does corn need?
+    - When is the corn planting season?
+    - Can I grow corn in autumn?
+    - Does corn need a lot of sunlight?
 
 - intent: faq_best_season_potato
   examples: |
@@ -41,6 +64,12 @@ nlu:
     - When should I plant potatoes for the best harvest?
     - Can I grow potatoes in hot weather?
     - What is the best time to plant potatoes?
+    - Can potatoes grow in winter?
+    - Is spring a good time for potatoes?
+    - What climate is best for potatoes?
+    - When should I sow potato seeds?
+    - Can potatoes tolerate frost?
+    - Does potato need cool weather?
 
 - intent: faq_best_season_carrot
   examples: |
@@ -48,6 +77,12 @@ nlu:
     - Which season is best for planting carrots?
     - What is the best climate for carrots?
     - Can carrots grow in hot weather?
+    - Is autumn a good time for carrots?
+    - Can carrots grow in summer?
+    - What temperature is ideal for carrots?
+    - When should I sow carrot seeds?
+    - Can carrots tolerate frost?
+    - Does carrot need cool weather?
 
 - intent: faq_best_crops_rainy_season
   examples: |
@@ -55,6 +90,12 @@ nlu:
     - Which crops grow well during monsoon?
     - What vegetables can I plant in heavy rainfall areas?
     - Can I grow rice in the rainy season?
+    - Is maize suitable for the rainy season?
+    - What fruits grow well in the monsoon?
+    - Can I grow soybeans in the rainy season?
+    - What crops thrive in wet conditions?
+    - Is paddy a good crop for the rainy season?
+    - Can I grow vegetables in heavy rain?
 
 - intent: faq_best_crops_spring
   examples: |
@@ -62,6 +103,12 @@ nlu:
     - What vegetables should I plant in spring?
     - What are the best fruits to grow in spring?
     - Can I plant flowers in spring?
+    - Is lettuce a good spring crop?
+    - Can I grow strawberries in spring?
+    - What grains grow well in spring?
+    - Is spinach a good spring vegetable?
+    - Can I grow peas in spring?
+    - What herbs grow well in spring?
 
 - intent: faq_best_crops_summer
   examples: |
@@ -69,6 +116,12 @@ nlu:
     - Which vegetables grow well in hot weather?
     - What are heat-resistant crops for hot climates?
     - Can I grow tomatoes in summer?
+    - Is corn a good summer crop?
+    - Can I grow cucumbers in summer?
+    - What fruits grow well in summer?
+    - Is watermelon a good summer crop?
+    - Can I grow peppers in summer?
+    - What crops tolerate high temperatures?
 
 - intent: faq_best_crops_winter
   examples: |
@@ -76,6 +129,12 @@ nlu:
     - What are the best vegetables to plant in cold weather?
     - Can I grow lettuce in winter?
     - Which fruits thrive in cold climates?
+    - Is cabbage a good winter crop?
+    - Can I grow carrots in winter?
+    - What grains grow well in winter?
+    - Is broccoli a good winter vegetable?
+    - Can I grow spinach in winter?
+    - What crops tolerate frost?
 
 - intent: faq_best_crops_autumn
   examples: |
@@ -83,6 +142,12 @@ nlu:
     - What vegetables grow best in fall?
     - Can I plant wheat in autumn?
     - What are the best fruits to grow in autumn?
+    - Is pumpkin a good autumn crop?
+    - Can I grow beets in autumn?
+    - What grains grow well in autumn?
+    - Is garlic a good autumn crop?
+    - Can I grow apples in autumn?
+    - What crops tolerate mild temperatures?
 
 - intent: faq_irrigation_methods
   examples: |
@@ -90,6 +155,12 @@ nlu:
     - How does drip irrigation work?
     - Is sprinkler irrigation better than flood irrigation?
     - What is the best irrigation system for sandy soil?
+    - Can I use drip irrigation for vegetables?
+    - How does flood irrigation work?
+    - What is the most efficient irrigation method?
+    - Can I use sprinklers for large fields?
+    - How to choose the right irrigation method?
+    - What irrigation method saves the most water?
 
 - intent: faq_water_wheat
   examples: |
@@ -97,6 +168,12 @@ nlu:
     - What is the best watering schedule for wheat?
     - How often should I irrigate wheat fields?
     - Can overwatering affect wheat growth?
+    - Does wheat need a lot of water?
+    - How to water wheat in dry climates?
+    - What is the ideal water level for wheat?
+    - Can wheat survive in low water conditions?
+    - How much water does wheat need during germination?
+    - What happens if wheat is underwatered?
 
 - intent: faq_water_rice
   examples: |
@@ -104,6 +181,12 @@ nlu:
     - Does rice need continuous flooding?
     - What is the ideal water level for rice farming?
     - Can rice survive in low water conditions?
+    - How much water does rice need daily?
+    - Can I grow rice without flooding?
+    - What is the best water management for rice?
+    - How to reduce water usage in rice farming?
+    - Can rice grow in dry conditions?
+    - What happens if rice fields dry out?
 
 - intent: faq_water_tomato
   examples: |
@@ -111,6 +194,12 @@ nlu:
     - How frequently should I water tomatoes?
     - Can overwatering damage tomato plants?
     - Is drip irrigation good for tomatoes?
+    - How much water do tomato plants need daily?
+    - Can tomatoes grow in dry conditions?
+    - What is the best way to water tomatoes?
+    - How to prevent overwatering tomatoes?
+    - Can tomatoes survive in low water conditions?
+    - What happens if tomatoes are underwatered?
 
 - intent: faq_water_potato
   examples: |
@@ -118,6 +207,12 @@ nlu:
     - How often should I water potatoes?
     - Can potatoes tolerate dry conditions?
     - What is the best irrigation method for potatoes?
+    - How much water do potatoes need during growth?
+    - Can potatoes survive in low water conditions?
+    - What is the best way to water potatoes?
+    - How to prevent overwatering potatoes?
+    - Can potatoes grow in wet soil?
+    - What happens if potatoes are underwatered?
 
 - intent: faq_water_corn
   examples: |
@@ -125,6 +220,12 @@ nlu:
     - How often should I irrigate corn crops?
     - Does corn need frequent watering?
     - What happens if corn is overwatered?
+    - How much water does corn need daily?
+    - Can corn grow in dry conditions?
+    - What is the best way to water corn?
+    - How to prevent overwatering corn?
+    - Can corn survive in low water conditions?
+    - What happens if corn is underwatered?
 
 - intent: faq_water_carrot
   examples: |
@@ -132,6 +233,12 @@ nlu:
     - What is the best irrigation method for carrots?
     - Do carrots need a lot of water?
     - Can overwatering affect carrot growth?
+    - How much water do carrots need daily?
+    - Can carrots grow in dry conditions?
+    - What is the best way to water carrots?
+    - How to prevent overwatering carrots?
+    - Can carrots survive in low water conditions?
+    - What happens if carrots are underwatered?
 
 - intent: faq_pest_control
   examples: |
@@ -139,6 +246,12 @@ nlu:
     - What are common pests in maize crops?
     - Are there organic ways to control pests in farming?
     - How do I prevent locust attacks on crops?
+    - What are natural ways to control pests?
+    - How to manage pests in rice fields?
+    - Can I use neem oil for pest control?
+    - What are the best pesticides for crops?
+    - How to prevent aphids on plants?
+    - What are the most common pests in farming?
 
 - intent: faq_fungal_diseases
   examples: |
@@ -146,6 +259,12 @@ nlu:
     - What should I do to avoid crop fungal infections?
     - What is the best way to treat fungal infections in tomato plants?
     - Can I use organic fungicides for crop protection?
+    - How to prevent fungal diseases in wheat?
+    - What are the symptoms of fungal infections?
+    - Can I use baking soda for fungal control?
+    - How to treat fungal diseases in rice?
+    - What are the best fungicides for crops?
+    - How to prevent mold on plants?
 
 - intent: faq_organic_farming
   examples: |
@@ -153,6 +272,12 @@ nlu:
     - How does organic farming work?
     - What are the benefits of organic farming?
     - Is organic farming more profitable than conventional farming?
+    - How to start organic farming?
+    - What are the disadvantages of organic farming?
+    - Can I use synthetic fertilizers in organic farming?
+    - How to get organic certification?
+    - What are the best organic farming practices?
+    - How to control pests in organic farming?
 
 - intent: faq_soil_fertility
   examples: |
@@ -160,6 +285,12 @@ nlu:
     - What are ways to boost soil fertility?
     - Which fertilizers are best for enriching soil?
     - Does soil pH affect fertility?
+    - How to test soil fertility?
+    - What are natural ways to improve soil?
+    - Can I use compost to improve soil fertility?
+    - How to increase nitrogen in soil?
+    - What are the best crops for soil fertility?
+    - How to prevent soil degradation?
 
 - intent: faq_precision_agriculture
   examples: |
@@ -167,6 +298,12 @@ nlu:
     - How does precision agriculture work?
     - What technologies are used in precision farming?
     - Can drones be used for precision agriculture?
+    - How to implement precision agriculture?
+    - What are the benefits of precision farming?
+    - Can I use GPS for precision agriculture?
+    - How to monitor crops using precision agriculture?
+    - What are the challenges of precision farming?
+    - How to reduce costs with precision agriculture?
 
 - intent: faq_nitrogen_deficiency
   examples: |
@@ -174,6 +311,12 @@ nlu:
     - How can I fix nitrogen deficiency in crops?
     - Which fertilizers help with nitrogen deficiency?
     - How does nitrogen affect plant growth?
+    - How to increase nitrogen in soil naturally?
+    - What are the signs of nitrogen deficiency in plants?
+    - Can I use compost to fix nitrogen deficiency?
+    - How to test for nitrogen deficiency?
+    - What are the best nitrogen-rich fertilizers?
+    - How to prevent nitrogen deficiency in crops?
 
 - intent: faq_soil_erosion
   examples: |
@@ -181,6 +324,12 @@ nlu:
     - How can I prevent soil erosion on my farm?
     - What are effective soil conservation methods?
     - Can planting trees help control soil erosion?
+    - How to reduce soil erosion in hilly areas?
+    - What are the effects of soil erosion?
+    - Can mulching prevent soil erosion?
+    - How to restore eroded soil?
+    - What are the best crops to prevent soil erosion?
+    - How to control soil erosion in dry areas?
 
 - intent: affirm
   examples: |
@@ -189,6 +338,11 @@ nlu:
     - absolutely
     - correct
     - that's right
+    - of course
+    - definitely
+    - agreed
+    - okay
+    - yep
 
 - intent: deny
   examples: |
@@ -196,12 +350,25 @@ nlu:
     - not really
     - I don't think so
     - nope
+    - not sure
+    - maybe not
+    - I disagree
+    - not at all
+    - negative
+    - nah
 
 - intent: bot_challenge
   examples: |
     - are you a bot?
     - who built you?
     - what is your name?
+    - are you human?
+    - who created you?
+    - are you an AI?
+    - what are you?
+    - are you a robot?
+    - who programmed you?
+    - are you real?
 
 - intent: goodbye
   examples: |
@@ -209,75 +376,210 @@ nlu:
     - see you later
     - bye
     - take care
+    - farewell
+    - see you soon
+    - catch you later
+    - bye for now
+    - have a good day
+    - until next time
 
 - intent: mood_great
   examples: |
     - I'm feeling great
     - I'm happy
     - Everything is awesome!
+    - I'm doing well
+    - I'm fantastic
+    - Life is good
+    - I'm in a great mood
+    - I'm thrilled
+    - I'm over the moon
+    - I'm on top of the world
 
 - intent: mood_unhappy
   examples: |
     - I'm sad
     - I'm not feeling well
     - I'm unhappy
+    - I'm feeling down
+    - I'm depressed
+    - I'm upset
+    - I'm frustrated
+    - I'm stressed
+    - I'm disappointed
+    - I'm feeling low
 
 - intent: request_irrigation_advice
   examples: |
     - How often should I water my crops?
     - Can you give me irrigation advice?
     - Best way to irrigate my farm?
+    - What is the best irrigation method?
+    - How to water my plants efficiently?
+    - Can you suggest an irrigation system?
+    - How to save water in farming?
+    - What is the best way to water crops?
+    - How to set up drip irrigation?
+    - How to manage water for crops?
 
 - intent: request_soil_analysis
   examples: |
     - How do I test my soil?
     - Can you analyze my soil?
     - What is the best soil test method?
+    - How to check soil fertility?
+    - Can you help me test my soil?
+    - What is the best way to analyze soil?
+    - How to test soil for nutrients?
+    - Can I test soil pH at home?
+    - How to check soil quality?
+    - What tools are needed for soil testing?
 
 - intent: faq_best_crops_for_season
   examples: |
     - What are the best crops to grow in winter?
     - What crops are suitable for summer?
     - Best crops for this season?
+    - What should I plant in spring?
+    - What crops grow well in autumn?
+    - What are the best crops for rainy season?
+    - What vegetables grow in summer?
+    - What fruits grow in winter?
+    - What grains grow in spring?
+    - What herbs grow in autumn?
 
 - intent: faq_common_pests
   examples: |
     - What are common pests in farming?
     - How to control crop pests?
     - What insects damage crops?
+    - What are the most harmful pests?
+    - How to prevent pests in farming?
+    - What are the best ways to control pests?
+    - What are the most common crop pests?
+    - How to manage pests in vegetables?
+    - What are the worst pests for crops?
+    - How to identify crop pests?
 
 - intent: faq_control_weeds
   examples: |
     - How to control weeds?
     - Best way to prevent weed growth?
     - How do farmers deal with weeds?
+    - What are the best weed control methods?
+    - How to remove weeds from fields?
+    - What are the most effective weed killers?
+    - How to prevent weeds in crops?
+    - What are the best herbicides for weeds?
+    - How to manage weeds in farming?
+    - What are the most common weeds?
 
 - intent: faq_crop_yield_factors
   examples: |
     - What factors affect crop yield?
     - How to improve crop production?
     - What impacts my harvest?
+    - What are the most important factors for crop yield?
+    - How to increase crop yield?
+    - What affects crop growth?
+    - How to maximize crop production?
+    - What are the key factors for high yield?
+    - How to improve harvest quality?
+    - What are the best practices for crop yield?
 
 - intent: faq_hydroponic_farming
   examples: |
     - What is hydroponic farming?
     - How does hydroponic farming work?
     - Is hydroponic farming better than soil farming?
+    - What are the benefits of hydroponics?
+    - How to start hydroponic farming?
+    - What crops grow well in hydroponics?
+    - What are the disadvantages of hydroponics?
+    - How to set up a hydroponic system?
+    - What nutrients are needed for hydroponics?
+    - How to maintain a hydroponic farm?
 
 - intent: faq_reduce_water_usage
   examples: |
     - How to reduce water usage in farming?
     - Best water-saving techniques for crops?
     - How can I save water while farming?
+    - What are the best ways to conserve water?
+    - How to use less water in agriculture?
+    - What are the most efficient irrigation methods?
+    - How to reduce water waste in farming?
+    - What are the best water-saving crops?
+    - How to manage water resources in farming?
+    - How to implement water-saving practices?
 
 - intent: faq_test_soil_ph
   examples: |
     - How to test soil pH?
     - What pH is best for farming?
     - How do I know my soil is acidic or alkaline?
+    - What is the ideal soil pH for crops?
+    - How to check soil pH at home?
+    - What tools are needed to test soil pH?
+    - How to adjust soil pH?
+    - What crops grow in acidic soil?
+    - What crops grow in alkaline soil?
+    - How to improve soil pH for farming?
 
 - intent: user_message
   examples: |
     - I have a question
     - Can you help me?
     - I need assistance
+    - I need help with farming
+    - Can you answer my question?
+    - I have a farming query
+    - Can you assist me?
+    - I need advice on farming
+    - Can you provide information?
+    - I need guidance on crops
+
+- intent: ai_query
+  examples: |
+    - Suggest best crop to grow in winter in Islamabad?
+    - Suggest best crop to grow in summer in Islamabad?
+    - What is the best harvesting practice for maize?
+    - What is the best crop to grow in sandy soil?
+    - Which crops are best for rainy climates?
+    - Can you recommend drought-resistant crops?
+    - What is the ideal temperature for growing tomatoes?
+    - How long does it take for rice to mature?
+    - What is crop rotation, and why is it important?
+    - Which crops improve soil fertility?
+    - What are high-yield wheat varieties?
+    - Suggest some cash crops for small farmers.
+    - How do I improve crop yield in low-fertility soil?
+    - What is the best irrigation method for cotton?
+    - How often should I water my wheat crop?
+    - Can drip irrigation be used for corn?
+    - Explain flood irrigation and its benefits.
+    - How to conserve water in agriculture?
+    - What fertilizers are best for sugarcane?
+    - How do I test my soil for nutrients?
+    - What is the NPK ratio for rice farming?
+    - Should I use organic or synthetic fertilizers?
+    - How do I make compost at home?
+    - How to protect crops from pests naturally?
+    - What are common wheat diseases and their treatments?
+    - Can neem oil be used as a pesticide?
+    - How do I control locust swarms?
+    - What is the best way to prevent fungal infections in crops?
+    - What is precision farming?
+    - Explain hydroponic farming.
+    - How does crop rotation help in pest control?
+    - What are the benefits of no-till farming?
+    - How to improve soil fertility naturally?
+    - How does climate change affect farming?
+    - What crops can survive extreme heat?
+    - How to protect crops from frost damage?
+    - Can I grow rice in a cold climate?
+    - What is the best way to store harvested grains?
+    - How do I market my crops online?
+    - Are there government subsidies for farmers?
+    - How can technology help small farmers?
+    - Suggest some apps for farm management.
