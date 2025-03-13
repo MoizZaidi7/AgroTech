@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../utils/axiosConfig';
+import { useNavigate } from 'react-router-dom';
+
 
 const DashAdmin = () => {
   const [users, setUsers] = useState([]);
@@ -8,6 +10,7 @@ const DashAdmin = () => {
   const [loading, setLoading] = useState(false);
   const [activeSection, setActiveSection] = useState('Manage Users');
   const [complaintTab, setComplaintTab] = useState('Active'); // 'Active' or 'Resolved'
+  const navigate = useNavigate();
 
   // Register User States
   const [registerForm, setRegisterForm] = useState({
@@ -822,6 +825,15 @@ const DashAdmin = () => {
 
                 </div>
               </div>
+              <div className="flex justify-center mt-8">
+              <button
+                onClick={() => navigate('/reports')} // Redirect to /reports
+                className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition"
+              >
+                View Detailed Analytics
+              </button>
+            </div>
+
         
               {/* Reports Content */}
               {Object.values(reportsLoading).some((isLoading) => isLoading) ? (

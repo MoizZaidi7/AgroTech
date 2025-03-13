@@ -272,15 +272,6 @@ const Register = () => {
                     </li>
                     <li
                       onClick={() => {
-                        setFormData({ ...formData, userType: "Admin" });
-                        setDropdownOpen(false);
-                      }}
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    >
-                      Admin
-                    </li>
-                    <li
-                      onClick={() => {
                         setFormData({ ...formData, userType: "Customer" });
                         setDropdownOpen(false);
                       }}

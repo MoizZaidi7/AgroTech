@@ -11,8 +11,13 @@ import {
 } from '../controllers/AdminController.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 import authorize from '../middleware/authorize.js';
+import { checkInactivity } from '../middleware/inactivity.js';
+import { updateLastActivity } from '../middleware/lastactivity.js';
 
 const AdminRouter = express.Router();
+
+AdminRouter.use(updateLastActivity);
+AdminRouter.use(checkInactivity);
 
 AdminRouter.get('/users', authMiddleware, authorize(['Admin']), getRegisteredUsers); // Only Admin can view users
 AdminRouter.put('/users/:userId', authMiddleware, authorize(['Admin']), updateUserDetails); // Only Admin can edit users

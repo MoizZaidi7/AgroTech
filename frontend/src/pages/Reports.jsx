@@ -1,113 +1,242 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { motion } from "framer-motion";
-import { FaChartLine, FaUsers, FaGlobe, FaDollarSign } from "react-icons/fa";
-import DashHeader from "../components/DashHeader";
+import React, { useState, useEffect } from 'react';
+import axiosInstance from '../utils/axiosConfig';
+import { Line, Bar } from 'react-chartjs-2';
+import { Chart, registerables } from 'chart.js';
+import { io } from 'socket.io-client';
+
+Chart.register(...registerables);
+
+const socket = io('http://localhost:5000');
 
 const ReportsPage = () => {
-  const [reports, setReports] = useState({});
-  const [selectedReport, setSelectedReport] = useState("User Engagement");
+  const [selectedReportType, setSelectedReportType] = useState('User Engagement');
+  const [userEngagement, setUserEngagement] = useState(null);
+  const [webAnalytics, setWebAnalytics] = useState(null);
+  const [salesReport, setSalesReport] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [webAnalyticsData, setWebAnalyticsData] = useState({
+    totalVisits: 0,
+    maxVisitedPage: '',
+    averageSessionDuration: '',
+    visitTrends: [],
+  });
 
-  const reportTypes = [
-    { title: "User Engagement", icon: <FaUsers /> },
-    { title: "Web Analytics", icon: <FaGlobe /> },
-    { title: "Sales and Revenue", icon: <FaDollarSign /> },
-  ];
+  // Socket.io - Real-time web analytics updates
+  useEffect(() => {
+    socket.on('webAnalyticsUpdate', (data) => {
+      setWebAnalyticsData(data);
+    });
 
-  const fetchReports = async (type) => {
+    return () => socket.off('webAnalyticsUpdate');
+  }, []);
+
+  // Fetch data when report type changes
+  useEffect(() => {
+    fetchReport(selectedReportType);
+  }, [selectedReportType]);
+
+  // Fetch reports directly from backend
+  const fetchReport = async (type) => {
     setLoading(true);
-    setError("");
     try {
-      const { data } = await axios.get(
-        `http://localhost:5000/api/reports/${type.toLowerCase().replace(/ /g, "-")}`,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
-      setReports(data);
+      const token = localStorage.getItem('token');
+      let response;
+
+      switch (type) {
+        case 'User Engagement':
+          response = await axiosInstance.get('http://localhost:5000/api/reports/user-engagement', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          console.log('User Engagement:', response.data);
+          setUserEngagement(response.data);
+          break;
+
+        case 'Web Analytics':
+          response = await axiosInstance.get('http://localhost:5000/api/reports/web-analytics', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          console.log('Web Analytics:', response.data);
+          setWebAnalytics(response.data);
+          break;
+
+        case 'Sales and Revenue':
+          response = await axiosInstance.get('http://localhost:5000/api/reports/sales-report', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          console.log('Sales Report:', response.data);
+          setSalesReport(response.data);
+          break;
+
+        default:
+          console.warn('Invalid report type selected');
+      }
     } catch (error) {
-      console.error("Error fetching reports:", error);
-      setError("Failed to load reports.");
+      console.error(`Error fetching ${type} report:`, error.response?.data || error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchReports(selectedReport);
-  }, [selectedReport]);
+  // Render charts based on selected report type
+  const renderCharts = () => {
+    switch (selectedReportType) {
+      case 'User Engagement': {
+        if (!userEngagement) return <p>No user engagement data available.</p>;
+
+        const { totalUsers = 0, activeUsers = 0, loggedInUsers = 0 } = userEngagement;
+        return (
+          <div className="mt-8">
+            <h3 className="text-xl font-semibold text-green-700">User Engagement Chart</h3>
+            <Bar
+              data={{
+                labels: ['Total Users', 'Active Users', 'Logged In Users'],
+                datasets: [
+                  {
+                    label: 'User Engagement',
+                    data: [totalUsers, activeUsers, loggedInUsers],
+                    backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(153, 102, 255, 0.2)'],
+                    borderColor: ['rgba(75, 192, 192, 1)', 'rgba(54, 162, 235, 1)', 'rgba(153, 102, 255, 1)'],
+                    borderWidth: 1,
+                  },
+                ],
+              }}
+              options={{
+                responsive: true,
+                plugins: {
+                  legend: { display: false },
+                },
+                scales: {
+                  y: { beginAtZero: true },
+                },
+              }}
+            />
+          </div>
+        );
+      }
+
+      case 'Web Analytics': {
+        if (!webAnalyticsData || webAnalyticsData.visitTrends.length === 0) {
+          return <p>No web analytics data available.</p>;
+        }
+
+        const { totalVisits, maxVisitedPage, averageSessionDuration, visitTrends } = webAnalyticsData;
+
+        return (
+          <div className="mt-8">
+            <h3 className="text-xl font-semibold text-green-700">Web Analytics Chart</h3>
+
+            {/* Summary */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <div className="bg-white shadow-md p-4 rounded-lg text-center">
+                <h4 className="text-lg font-semibold text-gray-700">Total Visits</h4>
+                <p className="text-2xl text-green-600 font-bold">{totalVisits}</p>
+              </div>
+              <div className="bg-white shadow-md p-4 rounded-lg text-center">
+                <h4 className="text-lg font-semibold text-gray-700">Max Visited Page</h4>
+                <p className="text-md text-gray-600">{maxVisitedPage || 'N/A'}</p>
+              </div>
+              <div className="bg-white shadow-md p-4 rounded-lg text-center">
+                <h4 className="text-lg font-semibold text-gray-700">Avg. Session Duration</h4>
+                <p className="text-md text-gray-600">{averageSessionDuration || 'N/A'}</p>
+              </div>
+            </div>
+
+            {/* Line Chart */}
+            <Line
+              data={{
+                labels: visitTrends.map((_, index) => `Day ${index + 1}`),
+                datasets: [
+                  {
+                    label: 'Visits',
+                    data: visitTrends,
+                    fill: false,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    tension: 0.1,
+                  },
+                ],
+              }}
+              options={{
+                responsive: true,
+                plugins: {
+                  legend: { display: false },
+                },
+                scales: {
+                  y: { beginAtZero: true },
+                },
+              }}
+            />
+          </div>
+        );
+      }
+
+      case 'Sales and Revenue': {
+        if (!salesReport) return <p>No sales report data available.</p>;
+
+        const { cropSales = 0, pesticideSales = 0, equipmentRentals = 0 } = salesReport;
+        return (
+          <div className="mt-8">
+            <h3 className="text-xl font-semibold text-green-700">Sales and Revenue Chart</h3>
+            <Bar
+              data={{
+                labels: ['Crop Sales', 'Pesticide Sales', 'Equipment Rentals'],
+                datasets: [
+                  {
+                    label: 'Sales',
+                    data: [cropSales, pesticideSales, equipmentRentals],
+                    backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(255, 159, 64, 0.2)', 'rgba(255, 205, 86, 0.2)'],
+                    borderColor: ['rgba(255, 99, 132, 1)', 'rgba(255, 159, 64, 1)', 'rgba(255, 205, 86, 1)'],
+                    borderWidth: 1,
+                  },
+                ],
+              }}
+              options={{
+                responsive: true,
+                plugins: {
+                  legend: { display: false },
+                },
+                scales: {
+                  y: { beginAtZero: true },
+                },
+              }}
+            />
+          </div>
+        );
+      }
+
+      default:
+        return <p className="text-red-500 text-center">No data available for the selected report.</p>;
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-white">
-      <DashHeader />
-      <div className="flex">
-        {/* Sidebar Navigation */}
-        <div className="w-64 bg-gray-100 p-6">
-          <h2 className="text-xl font-bold mb-4">Reports</h2>
-          <ul>
-            {reportTypes.map((report) => (
-              <li
-                key={report.title}
-                onClick={() => setSelectedReport(report.title)}
-                className={`p-4 cursor-pointer flex items-center space-x-2 ${
-                  selectedReport === report.title ? "bg-green-500 text-white" : "text-gray-800"
-                }`}
-              >
-                {report.icon}
-                <span>{report.title}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+    <div className="p-8 bg-gray-100 min-h-screen">
+      <h1 className="text-4xl font-bold text-center text-green-700 mb-8">Reports and Analytics</h1>
+      <p className="text-center text-lg text-gray-700 mb-8">View and analyze data across the platform.</p>
 
-        {/* Reports Display */}
-        <div className="flex-1 p-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-8"
+      {/* Report Type Selector */}
+      <div className="flex justify-center">
+        <div className="bg-white p-4 rounded-md shadow-md w-full max-w-md">
+          <label className="block text-green-700 font-medium mb-2">Select Report Type:</label>
+          <select
+            value={selectedReportType}
+            onChange={(e) => setSelectedReportType(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-md text-black"
           >
-            <h1 className="text-3xl font-bold text-gray-800">{selectedReport} Report</h1>
-          </motion.div>
-
-          {loading ? (
-            <p>Loading...</p>
-          ) : error ? (
-            <p className="text-red-500">{error}</p>
-          ) : (
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              {selectedReport === "User Engagement" && (
-                <div>
-                  <p>Total Users: {reports.totalUsers}</p>
-                  <p>Active Users: {reports.activeUsers}</p>
-                  <p>Logged-in Users: {reports.loggedInUsers}</p>
-                  <p>Engagement Rate: {reports.engagementRate}%</p>
-                </div>
-              )}
-
-              {selectedReport === "Web Analytics" && (
-                <div>
-                  <p>Total Visits: {reports.totalVisits}</p>
-                  <p>Most Visited Page: {reports.maxVisitedPage}</p>
-                  <p>Avg. Session Duration: {reports.averageSessionDuration}</p>
-                </div>
-              )}
-
-              {selectedReport === "Sales and Revenue" && (
-                <div>
-                  <p>Crop Sales: {reports.cropSales}</p>
-                  <p>Pesticide Sales: {reports.pesticideSales}</p>
-                  <p>Equipment Rentals: {reports.equipmentRentals}</p>
-                  <p>Total Revenue: ${reports.totalRevenue}</p>
-                </div>
-              )}
-            </div>
-          )}
+            <option value="User Engagement">User Engagement</option>
+            <option value="Web Analytics">Web Analytics</option>
+            <option value="Sales and Revenue">Sales and Revenue</option>
+          </select>
         </div>
       </div>
+
+      {/* Report Charts */}
+      {loading ? (
+        <div className="flex justify-center mt-8">
+          <p className="text-green-700">Loading reports...</p>
+        </div>
+      ) : (
+        <div className="mt-12">{renderCharts()}</div>
+      )}
     </div>
   );
 };
