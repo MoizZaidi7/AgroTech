@@ -6,7 +6,7 @@ import { IoChatbubbleEllipsesSharp, IoClose, IoOpen } from "react-icons/io5";
 const ChatbotWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { sender: "bot", text: "Hi! How can I help you today?" }
+    { sender: "bot", text: "Hi! How can I help you today?" },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -26,15 +26,13 @@ const ChatbotWidget = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Toggle chatbot popup
   const toggleChatbot = () => {
     setIsOpen(!isOpen);
     setIsComplaintMode(false);
     setShowComplaintForm(false);
-    setComplaints([]); // Clear complaints when closing the chatbot
+    setComplaints([]);
   };
 
-  // Open chatbot in a new window
   const openChatbotWindow = () => {
     if (!chatWindowRef.current || chatWindowRef.current.closed) {
       chatWindowRef.current = window.open("/chatbot", "Chatbot", "width=400,height=600");
@@ -44,7 +42,6 @@ const ChatbotWidget = () => {
     }
   };
 
-  // Handle user message (only for Query Section)
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -55,16 +52,15 @@ const ChatbotWidget = () => {
     setIsLoading(true);
 
     try {
-      // Directly specify the Rasa server URL
       const response = await axios.post(
-        "http://localhost:5005/webhooks/rest/webhook", // Replace with your Rasa server URL
-        { sender: "user", message: input } // Ensure the payload matches Rasa's expected format
+        "http://localhost:5002/webhooks/rest/webhook",
+        { sender: "user", message: input }
       );
 
       if (response.data.length > 0) {
         const botReplies = response.data.map((res) => ({
           sender: "bot",
-          text: res.text || "I didn't understand that."
+          text: res.text || "I didn't understand that.",
         }));
         setMessages([...newMessages, ...botReplies]);
       } else {
@@ -86,17 +82,15 @@ const ChatbotWidget = () => {
       return;
     }
 
-    console.log("Submitting complaint:", complaintDetails); // Debugging Step
-
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/users/complaints/create", // Replace with your backend URL
+        "http://localhost:5000/api/users/complaints/create",
         complaintDetails,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
             "Content-Type": "application/json",
-          }
+          },
         }
       );
 
@@ -114,15 +108,14 @@ const ChatbotWidget = () => {
     }
   };
 
-  // Handle tracking complaint
   const trackComplaint = async () => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/users/complaints", // Replace with your backend URL
+        "http://localhost:5000/api/users/complaints",
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
@@ -149,7 +142,7 @@ const ChatbotWidget = () => {
       <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        className="p-3 bg-green-600 text-white rounded-full shadow-lg flex items-center"
+        className="p-3 bg-green-600 text-white rounded-full shadow-lg flex items-center hover:bg-green-700 transition-all"
         onClick={toggleChatbot}
       >
         {isOpen ? <IoClose size={24} /> : <IoChatbubbleEllipsesSharp size={24} />}
@@ -158,7 +151,7 @@ const ChatbotWidget = () => {
       <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        className="ml-2 p-3 bg-blue-600 text-white rounded-full shadow-lg flex items-center"
+        className="ml-2 p-3 bg-blue-600 text-white rounded-full shadow-lg flex items-center hover:bg-blue-700 transition-all"
         onClick={openChatbotWindow}
       >
         <IoOpen size={24} />
@@ -169,25 +162,29 @@ const ChatbotWidget = () => {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
-          className="w-96 bg-white shadow-xl rounded-lg fixed bottom-16 right-5"
+          className="w-96 bg-white/90 backdrop-blur-md shadow-2xl rounded-lg fixed bottom-16 right-5 border border-green-200"
         >
-          <div className="p-4 bg-green-700 text-white flex justify-between items-center rounded-t-lg">
+          <div className="p-4 bg-gradient-to-r from-green-600 to-green-700 text-white flex justify-between items-center rounded-t-lg">
             <span className="text-lg font-semibold">Chatbot</span>
-            <button onClick={toggleChatbot} className="text-white">
+            <button onClick={toggleChatbot} className="text-white hover:text-green-200 transition-all">
               <IoClose size={20} />
             </button>
           </div>
 
-          <div className="flex p-3 border-b">
+          <div className="flex p-3 border-b border-green-200">
             <button
               onClick={() => setIsComplaintMode(false)}
-              className={`flex-1 p-2 ${!isComplaintMode ? "bg-green-500 text-white" : "bg-gray-300"} rounded-md`}
+              className={`flex-1 p-2 ${
+                !isComplaintMode ? "bg-green-500 text-white" : "bg-gray-200 text-gray-700"
+              } rounded-md transition-all hover:bg-green-600`}
             >
               Ask Query
             </button>
             <button
               onClick={() => setIsComplaintMode(true)}
-              className={`flex-1 p-2 ${isComplaintMode ? "bg-red-500 text-white" : "bg-gray-300"} rounded-md`}
+              className={`flex-1 p-2 ${
+                isComplaintMode ? "bg-red-500 text-white" : "bg-gray-200 text-gray-700"
+              } rounded-md transition-all hover:bg-red-600`}
             >
               Log Complaint
             </button>
@@ -195,9 +192,14 @@ const ChatbotWidget = () => {
 
           {!isComplaintMode ? (
             <div>
-              <div className="p-4 h-64 overflow-y-auto">
+              <div className="p-4 h-64 overflow-y-auto bg-gradient-to-b from-green-50 to-white">
                 {messages.map((msg, index) => (
-                  <div key={index} className={`mb-2 p-2 rounded-md ${msg.sender === "user" ? "bg-green-200 text-right" : "bg-gray-200"}`}>
+                  <div
+                    key={index}
+                    className={`mb-2 p-2 rounded-md ${
+                      msg.sender === "user" ? "bg-green-100 text-green-900 ml-auto" : "bg-gray-100 text-gray-900"
+                    } max-w-[80%]`}
+                  >
                     {msg.text}
                   </div>
                 ))}
@@ -205,33 +207,36 @@ const ChatbotWidget = () => {
                 <div ref={messagesEndRef} />
               </div>
 
-              <div className="p-3 border-t flex">
+              <div className="p-3 border-t border-green-200 flex">
                 <form onSubmit={sendMessage} className="flex w-full">
                   <input
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    className="flex-1 p-2 border rounded-md"
+                    className="flex-1 p-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                     placeholder="Type a message..."
                   />
-                  <button type="submit" className="ml-2 p-2 bg-green-600 text-white rounded-md">
+                  <button
+                    type="submit"
+                    className="ml-2 p-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-all"
+                  >
                     Send
                   </button>
                 </form>
               </div>
             </div>
           ) : (
-            <div className="p-3">
+            <div className="p-3 bg-gradient-to-b from-green-50 to-white">
               <div className="flex flex-wrap gap-2 mb-3">
                 <button
                   onClick={() => setShowComplaintForm(true)}
-                  className="p-2 bg-red-100 text-red-700 rounded-md"
+                  className="p-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-all"
                 >
                   Create Complaint
                 </button>
                 <button
                   onClick={trackComplaint}
-                  className="p-2 bg-red-100 text-red-700 rounded-md"
+                  className="p-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-all"
                 >
                   Track Complaint
                 </button>
@@ -244,12 +249,12 @@ const ChatbotWidget = () => {
                     placeholder="Complaint Name"
                     value={complaintDetails.name}
                     onChange={(e) => setComplaintDetails({ ...complaintDetails, name: e.target.value })}
-                    className="w-full p-2 border rounded-md mb-2"
+                    className="w-full p-2 border border-green-300 rounded-md mb-2 focus:outline-none focus:ring-2 focus:ring-green-500"
                   />
                   <select
                     value={complaintDetails.type}
                     onChange={(e) => setComplaintDetails({ ...complaintDetails, type: e.target.value })}
-                    className="w-full p-2 border rounded-md mb-2"
+                    className="w-full p-2 border border-green-300 rounded-md mb-2 focus:outline-none focus:ring-2 focus:ring-green-500"
                   >
                     <option value="">Select Complaint Type</option>
                     <option value="Technical Issues">Technical Issues</option>
@@ -262,11 +267,11 @@ const ChatbotWidget = () => {
                     placeholder="Complaint Details"
                     value={complaintDetails.details}
                     onChange={(e) => setComplaintDetails({ ...complaintDetails, details: e.target.value })}
-                    className="w-full p-2 border rounded-md mb-2"
+                    className="w-full p-2 border border-green-300 rounded-md mb-2 focus:outline-none focus:ring-2 focus:ring-green-500"
                   />
                   <button
                     onClick={submitComplaint}
-                    className="w-full p-2 bg-red-500 text-white rounded-md"
+                    className="w-full p-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-all"
                     disabled={isLoading}
                   >
                     {isLoading ? "Submitting..." : "Submit Complaint"}
@@ -275,14 +280,28 @@ const ChatbotWidget = () => {
               )}
 
               {complaints.length > 0 && (
-                <div className="mt-4">
-                  <h3 className="text-lg font-semibold mb-2">Your Complaints</h3>
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 mb-2">Complaint History</h4>
                   <ul className="space-y-2">
-                    {complaints.map((complaint, index) => (
-                      <li key={index} className="p-2 bg-gray-100 rounded-md">
-                        <p><strong>Name:</strong> {complaint.name}</p>
-                        <p><strong>Type:</strong> {complaint.type}</p>
-                        <p><strong>Status:</strong> {complaint.status}</p>
+                    {complaints.map((complaint) => (
+                      <li key={complaint.id} className="p-2 bg-gray-100 rounded-md text-sm">
+                        <div className="font-medium text-gray-800">{complaint.name}</div>
+                        <div className="text-gray-600">{complaint.type}</div>
+                        <div className="text-xs text-gray-500">{complaint.details}</div>
+                        <div className="mt-1">
+                          <span className="text-xs font-medium text-gray-700">Status:</span>
+                          <span
+                            className={`ml-1 text-xs ${
+                              complaint.status === "Resolved"
+                                ? "text-green-600"
+                                : complaint.status === "In Progress"
+                                ? "text-yellow-600"
+                                : "text-red-600"
+                            }`}
+                          >
+                            {complaint.status || "Pending"}
+                          </span>
+                        </div>
                       </li>
                     ))}
                   </ul>

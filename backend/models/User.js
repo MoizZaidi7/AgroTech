@@ -1,7 +1,9 @@
 import mongoose from "mongoose";
 
-const allowedDomains = ['gmail.com', 'yahoo.com', 'outlook.com', 'agrotech.com']; // Add your valid domains here
+// Define allowed email domains
+const allowedDomains = ['gmail.com', 'yahoo.com', 'outlook.com', 'agrotech.com']; 
 
+// Define user schema
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   firstName: { type: String, required: false },
@@ -32,6 +34,19 @@ const userSchema = new mongoose.Schema({
   verificationToken: { type: String },
   verificationTokenExpire: { type: Date },
   createdAt: { type: Date, default: Date.now },
+});
+
+// Pre-save hook to enforce one admin rule
+userSchema.pre('save', async function(next) {
+  if (this.userType === 'Admin') {
+    const existingAdminCount = await mongoose.model('User').countDocuments({ userType: 'Admin' });
+
+    if (existingAdminCount > 0) {
+      const error = new Error('Only one Admin user is allowed!');
+      next(error); // Stop saving the user if an admin already exists
+    }
+  }
+  next();
 });
 
 const User = mongoose.model('User', userSchema);
