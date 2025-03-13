@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import helmet from "helmet";
 import userRouter from "./routes/UserRoutes.js";
 import AdminRouter from "./routes/AdminRoutes.js";
+import ReportRouter from "./routes/ReportRoutes.js";
 import connectDB from "./config/db.js";
 
 
@@ -26,7 +27,7 @@ app.use(helmet()); // Secure HTTP headers
 // Routes
 app.use('/api/users', userRouter); // User-related routes
 app.use('/api/admin', AdminRouter); // Admin-specific routes
-
+app.use('/api/reports', ReportRouter); //Report-Based routes
 
 // Default Route
 app.get('/', (req, res) => {

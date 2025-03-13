@@ -2,6 +2,8 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import PrivateRoute from "./components/PrivateRoute.jsx";
 import PublicRoute from "./components/PublicRoute.jsx";
+
+// Pages
 import Login from "./pages/login";
 import Register from "./pages/register";
 import Dashboard from "./pages/dashboard";
@@ -9,6 +11,9 @@ import ForgotPassword from "./pages/forgotPassword";
 import ResetPassword from "./pages/resetPassword";
 import DashAdmin from "./pages/dashboardadmin";
 import DashFarmer from "./pages/dashboardFarmer.jsx";
+import ReportsPage from "./pages/Reports.jsx";
+
+// Components
 import Header from "./components/Header.jsx";
 import DashHeader from "./components/DashHeader.jsx";
 import { ChatbotWidget } from "./components/ChatBotWidget";
@@ -34,13 +39,26 @@ const AppRoutes = () => {
           <><DashHeader /><DashFarmer /></>
         </PrivateRoute>
       }/>
+      {/* Reports Module - Admin Only */}
+      <Route path="/reports" element={
+        <PrivateRoute roles={["Admin"]}>
+          <><DashHeader /><ReportsPage /></>
+        </PrivateRoute>
+      }/>
     </Routes>
   );
 };
 
 const App = () => {
   const location = useLocation();
-  const hideChatbotOn = ["/login", "/register", "/forgotPassword", "/resetPassword", "/dashboardadmin"];
+  const hideChatbotOn = [
+    "/login",
+    "/register",
+    "/forgotPassword",
+    "/resetPassword",
+    "/dashboardadmin",
+    "/reports", // Optional: Hide chatbot on reports page
+  ];
 
   return (
     <>
@@ -50,6 +68,7 @@ const App = () => {
   );
 };
 
+// Root App with Router
 export default function RootApp() {
   return (
     <Router>

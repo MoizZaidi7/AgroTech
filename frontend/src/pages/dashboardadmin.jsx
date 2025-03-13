@@ -26,6 +26,21 @@ const DashAdmin = () => {
   const [complaintStatus, setComplaintStatus] = useState('Pending');
   const [complaintResponse, setComplaintResponse] = useState('');
   const [updateError, setUpdateError] = useState('');
+  
+  // Reports States
+  const [reportType, setReportType] = useState("user-engagement");
+  const [selectedReportType, setSelectedReportType] = useState("All");
+  const [reports, setReports] = useState({
+    userEngagement: [],
+    webAnalytics: [],
+    salesReport: []
+  });
+  const [reportsLoading, setReportsLoading] = useState({
+    userEngagement: false,
+    webAnalytics: false,
+    salesReport: false
+  });
+
 
   // Fetch Users
   useEffect(() => {
@@ -49,6 +64,14 @@ const DashAdmin = () => {
       fetchComplaints();
     }
   }, [activeSection]);
+  
+  // Fetch reports when Reports and Analytics section is active
+  useEffect(() => {
+    if (activeSection === "Reports and Analytics") {
+      // Initially fetch the default report type
+      fetchReportByType(reportType);
+    }
+  }, [activeSection, reportType]);
    
   // Separate function to fetch complaints for reuse
   const fetchComplaints = async () => {
@@ -71,6 +94,76 @@ const DashAdmin = () => {
       setLoading(false); // Hide loading indicator
     }
   };
+  
+  const fetchReportByType = async (type) => {
+    // Update loading state for the specific report type
+    setReportsLoading(prev => ({
+      ...prev,
+      [type]: true
+    }));
+    
+    try {
+      const response = await axiosInstance.get(
+        `http://localhost:5000/api/reports/${type}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
+      );
+      
+      // Update only the specific report in the reports state
+      setReports(prev => ({
+        ...prev,
+        [type]: response.data
+      }));
+    } catch (error) {
+      console.error(`Error fetching ${type} report:`, error.response?.data || error.message);
+    } finally {
+      setReportsLoading(prev => ({
+        ...prev,
+        [type]: false
+      }));
+    }
+  };
+
+  // Fetch all reports at once
+  const fetchAllReports = async () => {
+    setReportsLoading({
+      userEngagement: true,
+      webAnalytics: true,
+      salesReport: true
+    });
+    
+    try {
+      const [userEngagementRes, webAnalyticsRes, salesReportRes] = await Promise.all([
+        axiosInstance.get('http://localhost:5000/api/reports/user-engagement', {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        }),
+        axiosInstance.get('http://localhost:5000/api/reports/web-analytics', {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        }),
+        axiosInstance.get('http://localhost:5000/api/reports/sales-report', {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        })
+      ]);
+      
+      setReports({
+        userEngagement: userEngagementRes.data,
+        webAnalytics: webAnalyticsRes.data,
+        salesReport: salesReportRes.data
+      });
+    } catch (error) {
+      console.error('Error fetching all reports:', error);
+    } finally {
+      setReportsLoading({
+        userEngagement: false,
+        webAnalytics: false,
+        salesReport: false
+      });
+    }
+  };
+
 
   // Handle Register User
   const handleRegisterUser = async (e) => {
@@ -216,6 +309,7 @@ const DashAdmin = () => {
     { title: 'Manage Users' },
     { title: 'Register User' },
     { title: 'Manage Complaints' },
+    { title: 'Reports and Analytics' }, // Added Reports section
   ];
 
   // Fixed filtering of complaints based on status - ensure case insensitive comparison
@@ -686,11 +780,121 @@ const DashAdmin = () => {
             )}
           </div>
         );
-      default:
-        return null;
+        case 'Reports and Analytics':
+          return (
+            <div className="relative z-0 pt-32 px-6 py-8">
+              <h1 className="text-4xl font-bold text-center text-white mb-8">
+                Reports and Analytics
+              </h1>
+              <p className="text-center text-lg text-gray-200">
+                View and analyze data across the platform.
+              </p>
+        
+              {/* Report Type Filter */}
+              <div className="flex justify-center mt-8">
+                <div className="bg-white p-4 rounded-md w-full max-w-md">
+                  <label className="block text-green-700 font-medium mb-2">
+                    Select Report Type:
+                  </label>
+                  <select
+  value={selectedReportType}
+  onChange={(e) => {
+    const type = e.target.value;
+    setSelectedReportType(type);
+    if (type === "All") {
+      fetchAllReports();
+    } else {
+      const reportEndpoints = {
+        "User Engagement": "user-engagement",
+        "Web Analytics": "web-analytics",
+        "Sales and Revenue": "sales-report",
+      };
+      fetchReportByType(reportEndpoints[type]);
+    }
+  }}
+  className="w-full p-2 border border-gray-300 rounded-md text-black"
+>
+  <option value="All">All Reports</option>
+  <option value="User Engagement">User Engagement</option>
+  <option value="Web Analytics">Web Analytics</option>
+  <option value="Sales and Revenue">Sales and Revenue</option>
+</select>
+
+                </div>
+              </div>
+        
+              {/* Reports Content */}
+              {Object.values(reportsLoading).some((isLoading) => isLoading) ? (
+                <div className="flex justify-center mt-8">
+                  <div className="bg-white p-4 rounded-md">
+                    <p className="text-green-700">Loading reports...</p>
+                  </div>
+                </div>
+              ) : Object.keys(reports).length === 0 ? (
+                <div className="flex justify-center mt-8">
+                  <div className="bg-white p-4 rounded-md">
+                    <p className="text-green-700">No reports found.</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* Render only the selected report type */}
+                  {selectedReportType === "All"
+                    ? Object.entries(reports).map(([type, data], index) =>
+                        data && Object.keys(data).length > 0 ? (
+                          <div
+                            key={index}
+                            className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+                          >
+                            <h2 className="text-xl font-semibold text-green-700 capitalize">
+                              {type.replace(/([A-Z])/g, ' $1').trim()}
+                            </h2>
+                            <div className="mt-4">
+                              {Object.entries(data).map(([key, value]) => (
+                                <div key={key} className="mt-2">
+                                  <span className="font-medium text-gray-700">{key}: </span>
+                                  <span className="text-gray-600">
+                                    {typeof value === 'object' ? JSON.stringify(value) : value}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ) : null
+                      )
+                    : reports[selectedReportType] && Object.keys(reports[selectedReportType]).length > 0 ? (
+                        <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                          <h2 className="text-xl font-semibold text-green-700 capitalize">
+                            {selectedReportType.replace(/([A-Z])/g, ' $1').trim()}
+                          </h2>
+                          <div className="mt-4">
+                            {Object.entries(reports[selectedReportType]).map(([key, value]) => (
+                              <div key={key} className="mt-2">
+                                <span className="font-medium text-gray-700">{key}: </span>
+                                <span className="text-gray-600">
+                                  {typeof value === 'object' ? JSON.stringify(value) : value}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex justify-center mt-8">
+                          <div className="bg-white p-4 rounded-md">
+                            <p className="text-green-700">No data available for this report.</p>
+                          </div>
+                        </div>
+                      )}
+                </div>
+              )}
+            </div>
+          );
+        
+        default:
+          return null;        
+        
     }
   };
-
   return (
     <div className="flex min-h-screen bg-white">
       {/* Left Sidebar */}

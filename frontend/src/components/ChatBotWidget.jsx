@@ -57,7 +57,7 @@ const ChatbotWidget = () => {
     try {
       // Directly specify the Rasa server URL
       const response = await axios.post(
-        "http://localhost:5002/webhooks/rest/webhook", // Replace with your Rasa server URL
+        "http://localhost:5005/webhooks/rest/webhook", // Replace with your Rasa server URL
         { sender: "user", message: input } // Ensure the payload matches Rasa's expected format
       );
 

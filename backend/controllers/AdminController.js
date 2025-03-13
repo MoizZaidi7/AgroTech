@@ -1,5 +1,5 @@
 import Complaint from '../models/Complaint.js';
-import Report from '../models/Report.js';
+import Report from '../models/Reports.js';
 import User from '../models/User.js';
 import { sendEmail } from '../utils/sendEmail.js';
 import { generateWelcomeEmail } from '../utils/emailTemplates.js';
