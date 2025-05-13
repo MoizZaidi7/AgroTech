@@ -62,25 +62,41 @@ transform = transforms.Compose([
 ])
 
 # ====== Prediction Function ======
-def predict_image(image_path):
+def predict_image(image_path, threshold=0.75):
     image = Image.open(image_path).convert("RGB")
     image = transform(image).unsqueeze(0).to(device)
 
     with torch.no_grad():
         output = model(image)
-        _, predicted_class = torch.max(output, 1)
+        probabilities = torch.softmax(output, dim=1)
+        max_prob, predicted_class = torch.max(probabilities, 1)
         predicted_label = class_labels[predicted_class.item()]
 
-    # Handle cases where there's no underscore
-    if "_" in predicted_label:
-        crop_name, status = predicted_label.split('_', 1)  # Split only at the first underscore
-        status = "Healthy" if "Healthy" in status else "Diseased"
+    # Debugging: Log probabilities and predicted label
+    print("Probabilities:", probabilities)
+    print(f"Predicted Label: {predicted_label}, Confidence: {max_prob.item():.2f}")
+
+    # Extract crop name and health status
+    if "___" in predicted_label:
+        crop_name, status = predicted_label.split("___", 1)
     else:
         crop_name = predicted_label
         status = "Unknown"
 
+    # Check if it's healthy or diseased
+    if "healthy" in status.lower():
+        status = "Healthy"
+    else:
+        status = "Diseased"
+
+    # Handle low-confidence predictions
+    if max_prob.item() < threshold:
+        status = "Uncertain (Possibly Healthy)"
+
     print(f"Predicted Crop: {crop_name}, Condition: {status}")
-    return f"{crop_name} - {status}"
+    return f"{crop_name} - {status} (Confidence: {max_prob.item():.2f})"
+
+
 
 # ====== Flask App Setup ======
 app = Flask(__name__)

@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion"; // Importing framer-motion
 import '../styles/styles.css';
+
 const Register = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -20,6 +21,17 @@ const Register = () => {
   const [otpError, setOtpError] = useState("");
   const [successMessage, setSuccessMessage] = useState(""); // New state for success message
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  // Handle window resize for responsiveness
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -107,7 +119,7 @@ const Register = () => {
         className="absolute inset-0 flex items-center justify-center pt-24" // Added padding to push down the form
       >
         <motion.div
-          className="w-full max-w-md px-6 py-8 rounded-lg shadow-lg max-h-[80vh] overflow-y-auto invisible-scrollbar" // Applied invisible scrollbar class
+          className={`w-full ${isMobile ? "max-w-xs" : "max-w-md"} px-6 py-8 rounded-lg shadow-lg max-h-[80vh] overflow-y-auto invisible-scrollbar`} // Applied invisible scrollbar class
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.7, delay: 0.5 }}
@@ -269,6 +281,15 @@ const Register = () => {
                       className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                     >
                       Farmer
+                    </li>
+                    <li
+                      onClick={() => {
+                        setFormData({ ...formData, userType: "Admin" });
+                        setDropdownOpen(false);
+                      }}
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    >
+                      Admin
                     </li>
                     <li
                       onClick={() => {

@@ -3,6 +3,7 @@ import axiosInstance from '../utils/axiosConfig';
 import { Line, Bar } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 import { io } from 'socket.io-client';
+import { motion } from 'framer-motion';
 
 Chart.register(...registerables);
 
@@ -85,7 +86,12 @@ const ReportsPage = () => {
 
         const { totalUsers = 0, activeUsers = 0, loggedInUsers = 0 } = userEngagement;
         return (
-          <div className="mt-8">
+          <motion.div
+            className="mt-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             <h3 className="text-xl font-semibold text-green-700">User Engagement Chart</h3>
             <Bar
               data={{
@@ -110,7 +116,7 @@ const ReportsPage = () => {
                 },
               }}
             />
-          </div>
+          </motion.div>
         );
       }
 
@@ -122,23 +128,37 @@ const ReportsPage = () => {
         const { totalVisits, maxVisitedPage, averageSessionDuration, visitTrends } = webAnalyticsData;
 
         return (
-          <div className="mt-8">
+          <motion.div
+            className="mt-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             <h3 className="text-xl font-semibold text-green-700">Web Analytics Chart</h3>
 
             {/* Summary */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              <div className="bg-white shadow-md p-4 rounded-lg text-center">
+              <motion.div
+                className="bg-white shadow-md p-4 rounded-lg text-center hover:shadow-lg transition-shadow duration-300"
+                whileHover={{ scale: 1.02 }}
+              >
                 <h4 className="text-lg font-semibold text-gray-700">Total Visits</h4>
                 <p className="text-2xl text-green-600 font-bold">{totalVisits}</p>
-              </div>
-              <div className="bg-white shadow-md p-4 rounded-lg text-center">
+              </motion.div>
+              <motion.div
+                className="bg-white shadow-md p-4 rounded-lg text-center hover:shadow-lg transition-shadow duration-300"
+                whileHover={{ scale: 1.02 }}
+              >
                 <h4 className="text-lg font-semibold text-gray-700">Max Visited Page</h4>
                 <p className="text-md text-gray-600">{maxVisitedPage || 'N/A'}</p>
-              </div>
-              <div className="bg-white shadow-md p-4 rounded-lg text-center">
+              </motion.div>
+              <motion.div
+                className="bg-white shadow-md p-4 rounded-lg text-center hover:shadow-lg transition-shadow duration-300"
+                whileHover={{ scale: 1.02 }}
+              >
                 <h4 className="text-lg font-semibold text-gray-700">Avg. Session Duration</h4>
                 <p className="text-md text-gray-600">{averageSessionDuration || 'N/A'}</p>
-              </div>
+              </motion.div>
             </div>
 
             {/* Line Chart */}
@@ -165,7 +185,7 @@ const ReportsPage = () => {
                 },
               }}
             />
-          </div>
+          </motion.div>
         );
       }
 
@@ -174,7 +194,12 @@ const ReportsPage = () => {
 
         const { cropSales = 0, pesticideSales = 0, equipmentRentals = 0 } = salesReport;
         return (
-          <div className="mt-8">
+          <motion.div
+            className="mt-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             <h3 className="text-xl font-semibold text-green-700">Sales and Revenue Chart</h3>
             <Bar
               data={{
@@ -199,7 +224,7 @@ const ReportsPage = () => {
                 },
               }}
             />
-          </div>
+          </motion.div>
         );
       }
 
@@ -209,13 +234,18 @@ const ReportsPage = () => {
   };
 
   return (
-    <div className="p-8 bg-gray-100 min-h-screen">
+    <div className="p-8 bg-gradient-to-br from-green-50 to-green-100 min-h-screen">
       <h1 className="text-4xl font-bold text-center text-green-700 mb-8">Reports and Analytics</h1>
       <p className="text-center text-lg text-gray-700 mb-8">View and analyze data across the platform.</p>
 
       {/* Report Type Selector */}
-      <div className="flex justify-center">
-        <div className="bg-white p-4 rounded-md shadow-md w-full max-w-md">
+      <motion.div
+        className="flex justify-center"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="bg-white p-4 rounded-md shadow-md w-full max-w-md hover:shadow-lg transition-shadow duration-300">
           <label className="block text-green-700 font-medium mb-2">Select Report Type:</label>
           <select
             value={selectedReportType}
@@ -227,7 +257,7 @@ const ReportsPage = () => {
             <option value="Sales and Revenue">Sales and Revenue</option>
           </select>
         </div>
-      </div>
+      </motion.div>
 
       {/* Report Charts */}
       {loading ? (

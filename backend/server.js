@@ -8,8 +8,10 @@ import reportRouter from "./routes/ReportRoutes.js";
 import connectDB from "./config/db.js";
 import { Server } from 'socket.io';
 import http from "http";
-import { v4 as uuidv4 } from 'uuid'; // UUID package for unique visitor identification
-import cookieParser from "cookie-parser"; // Cookie parser to manage cookies
+import { v4 as uuidv4 } from 'uuid';
+import cookieParser from "cookie-parser";
+import MarketRouter from "./routes/MarketRoutes.js";
+import FarmerRouter from "./routes/FarmerRoutes.js";
 
 // Load environment variables
 dotenv.config();
@@ -17,12 +19,25 @@ dotenv.config();
 // Initialize Express app and server
 const app = express();
 const server = http.createServer(app);
+
+// Middleware setup - ORDER MATTERS!
+app.use(cookieParser()); // Parse cookies
+app.use(express.json()); // Parse JSON bodies
+app.use(cors({ 
+  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  credentials: true // Enable cross-origin cookies
+}));
+app.use(helmet()); // Add security headers
+
+// Socket.IO setup
 const io = new Server(server, {
   cors: {
     origin: process.env.CLIENT_URL || 'http://localhost:3000',
-    methods: ["GET", "POST"]
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
+
 const PORT = process.env.PORT || 5000;
 
 // Attach socket.io instance to app
@@ -31,96 +46,106 @@ app.set('socketio', io);
 // Connect to MongoDB
 connectDB();
 
-// Web Analytics Data
-let webAnalyticsData = {
-  totalVisits: 0, // Initial visit count
-  maxVisitedPage: '/dashboard',  // Initial max visited page (can be updated dynamically)
-  visitTrends: [],  // To keep track of daily visit counts
-  pageVisits: {},  // Object to track visits per route
-  uniqueVisitors: new Set()  // To track unique visitors using session ID
+// Web Analytics Data - Initialize with empty data
+const webAnalyticsData = {
+  totalVisits: 0,
+  maxVisitedPage: '/',
+  visitTrends: [],
+  pageVisits: {},
+  uniqueVisitors: new Set(),
+  averageSessionDuration: "0m 0s"
 };
 
-// Middleware to track real visits
-app.use(cookieParser()); // Use cookie parser to handle cookies
+// Attach analytics data to app for access in routes
+app.set('webAnalyticsData', webAnalyticsData);
 
+// Analytics middleware - tracks visits and page views
 app.use((req, res, next) => {
-  // Retrieve visitorId from cookies, or generate a new one if not present
-  let visitorId = req.cookies.visitorId;
-
-  // If visitorId doesn't exist, generate a new one and set it in the cookie
-  if (!visitorId) {
-    visitorId = uuidv4();
-    res.cookie('visitorId', visitorId, { maxAge: 365 * 24 * 60 * 60 * 1000, httpOnly: true }); // Set cookie for a year
-  }
-
-  // If this is a new visitor (i.e., a unique session), increment the total visit count
-  if (!webAnalyticsData.uniqueVisitors.has(visitorId)) {
-    webAnalyticsData.totalVisits++;
-    webAnalyticsData.uniqueVisitors.add(visitorId); // Mark this visitor as tracked
-  }
-
-  // Track visit trends for the last 7 days (simulating daily visits)
-  webAnalyticsData.visitTrends.push(webAnalyticsData.totalVisits);
-
-  // Keep only the latest 7 days of data
-  if (webAnalyticsData.visitTrends.length > 7) {
-    webAnalyticsData.visitTrends.shift();
-  }
-
-  // Track page visits
-  const currentPage = req.path;
-  if (webAnalyticsData.pageVisits[currentPage]) {
-    webAnalyticsData.pageVisits[currentPage]++;
-  } else {
-    webAnalyticsData.pageVisits[currentPage] = 1;
-  }
-
-  // Find the page with the maximum visits
-  let maxPage = '';
-  let maxVisits = 0;
-  for (let page in webAnalyticsData.pageVisits) {
-    if (webAnalyticsData.pageVisits[page] > maxVisits) {
-      maxPage = page;
-      maxVisits = webAnalyticsData.pageVisits[page];
+  try {
+    // Get or set visitor ID
+    let visitorId = req.cookies.visitorId;
+    if (!visitorId) {
+      visitorId = uuidv4();
+      res.cookie('visitorId', visitorId, { 
+        maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax'
+      });
     }
+
+    // Track unique visitors
+    if (!webAnalyticsData.uniqueVisitors.has(visitorId)) {
+      webAnalyticsData.totalVisits++;
+      webAnalyticsData.uniqueVisitors.add(visitorId);
+    }
+
+    // Track page visits
+    const currentPage = req.path;
+    webAnalyticsData.pageVisits[currentPage] = (webAnalyticsData.pageVisits[currentPage] || 0) + 1;
+
+    // Update max visited page
+    let maxVisits = 0;
+    let maxPage = '/';
+    for (const [page, visits] of Object.entries(webAnalyticsData.pageVisits)) {
+      if (visits > maxVisits) {
+        maxVisits = visits;
+        maxPage = page;
+      }
+    }
+    webAnalyticsData.maxVisitedPage = maxPage;
+
+    // Update visit trends (last 7 days)
+    const today = new Date().toISOString().split('T')[0];
+    const existingDay = webAnalyticsData.visitTrends.find(day => day.date === today);
+    
+    if (existingDay) {
+      existingDay.visits++;
+    } else {
+      webAnalyticsData.visitTrends.push({ date: today, visits: 1 });
+      if (webAnalyticsData.visitTrends.length > 7) {
+        webAnalyticsData.visitTrends.shift();
+      }
+    }
+
+    // Calculate average session duration (simplified example)
+    const avgMinutes = Math.floor(Math.random() * 5) + 1;
+    const avgSeconds = Math.floor(Math.random() * 60);
+    webAnalyticsData.averageSessionDuration = `${avgMinutes}m ${avgSeconds}s`;
+
+    // Emit updates to all connected clients
+    io.emit('webAnalyticsUpdate', webAnalyticsData);
+    
+    next();
+  } catch (err) {
+    console.error('Analytics middleware error:', err);
+    next(err);
   }
-
-  // Update maxVisitedPage
-  webAnalyticsData.maxVisitedPage = maxPage;
-
-  // Calculate the average session duration (You can modify this based on real logic)
-  const avgSessionDuration = Math.floor(Math.random() * 5) + 1; // Random simulation for session duration
-  webAnalyticsData.averageSessionDuration = `${avgSessionDuration}m ${Math.floor(Math.random() * 60)}s`;
-
-  // Emit updated analytics data to all connected clients
-  io.emit('webAnalyticsUpdate', webAnalyticsData);
-  console.log('Emitting Web Analytics:', webAnalyticsData);
-
-  next();
 });
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {
-  console.log('A client connected:', socket.id);
-
-  // Send initial data when client connects
+  console.log('New client connected:', socket.id);
+  
+  // Send initial data on connection
   socket.emit('webAnalyticsUpdate', webAnalyticsData);
 
-  // Clean up when client disconnects
   socket.on('disconnect', () => {
-    console.log('A client disconnected:', socket.id);
+    console.log('Client disconnected:', socket.id);
   });
 });
-
-// Middleware
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:3000' }));
-app.use(express.json());
-app.use(helmet());
 
 // Routes
 app.use('/api/users', userRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/farmer', FarmerRouter);
 app.use('/api/reports', reportRouter);
+app.use('/api/marketplace', MarketRouter);
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'healthy' });
+});
 
 // Default Route
 app.get('/', (req, res) => {

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../utils/axiosConfig';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { io } from 'socket.io-client';
 
 
 const DashAdmin = () => {
@@ -29,7 +31,7 @@ const DashAdmin = () => {
   const [complaintStatus, setComplaintStatus] = useState('Pending');
   const [complaintResponse, setComplaintResponse] = useState('');
   const [updateError, setUpdateError] = useState('');
-  
+
   // Reports States
   const [reportType, setReportType] = useState("user-engagement");
   const [selectedReportType, setSelectedReportType] = useState("All");
@@ -43,7 +45,6 @@ const DashAdmin = () => {
     webAnalytics: false,
     salesReport: false
   });
-
 
   // Fetch Users
   useEffect(() => {
@@ -67,15 +68,30 @@ const DashAdmin = () => {
       fetchComplaints();
     }
   }, [activeSection]);
-  
+
   // Fetch reports when Reports and Analytics section is active
   useEffect(() => {
     if (activeSection === "Reports and Analytics") {
-      // Initially fetch the default report type
       fetchReportByType(reportType);
     }
   }, [activeSection, reportType]);
-   
+
+  // Add this useEffect for real-time updates
+useEffect(() => {
+  const socket = io(process.env.REACT_APP_API_URL || 'http://localhost:5000');
+  
+  socket.on('webAnalyticsUpdate', (data) => {
+    setReports(prev => ({
+      ...prev,
+      webAnalytics: data
+    }));
+  });
+
+  return () => {
+    socket.disconnect();
+  };
+}, []);
+
   // Separate function to fetch complaints for reuse
   const fetchComplaints = async () => {
     setLoading(true); // Show loading while fetching complaints
@@ -97,38 +113,26 @@ const DashAdmin = () => {
       setLoading(false); // Hide loading indicator
     }
   };
-  
+
   const fetchReportByType = async (type) => {
-    // Update loading state for the specific report type
-    setReportsLoading(prev => ({
+  setReportsLoading(prev => ({ ...prev, [type]: true }));
+
+  try {
+    const response = await axiosInstance.get(
+      `/api/reports/${type}`,
+      { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+    );
+
+    setReports(prev => ({
       ...prev,
-      [type]: true
+      [type]: response.data
     }));
-    
-    try {
-      const response = await axiosInstance.get(
-        `http://localhost:5000/api/reports/${type}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        }
-      );
-      
-      // Update only the specific report in the reports state
-      setReports(prev => ({
-        ...prev,
-        [type]: response.data
-      }));
-    } catch (error) {
-      console.error(`Error fetching ${type} report:`, error.response?.data || error.message);
-    } finally {
-      setReportsLoading(prev => ({
-        ...prev,
-        [type]: false
-      }));
-    }
-  };
+  } catch (error) {
+    console.error(`Error fetching ${type} report:`, error);
+  } finally {
+    setReportsLoading(prev => ({ ...prev, [type]: false }));
+  }
+};
 
   // Fetch all reports at once
   const fetchAllReports = async () => {
@@ -137,7 +141,7 @@ const DashAdmin = () => {
       webAnalytics: true,
       salesReport: true
     });
-    
+
     try {
       const [userEngagementRes, webAnalyticsRes, salesReportRes] = await Promise.all([
         axiosInstance.get('http://localhost:5000/api/reports/user-engagement', {
@@ -150,7 +154,7 @@ const DashAdmin = () => {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         })
       ]);
-      
+
       setReports({
         userEngagement: userEngagementRes.data,
         webAnalytics: webAnalyticsRes.data,
@@ -166,7 +170,6 @@ const DashAdmin = () => {
       });
     }
   };
-
 
   // Handle Register User
   const handleRegisterUser = async (e) => {
@@ -190,7 +193,7 @@ const DashAdmin = () => {
         password: '',
         userType: 'Farmer',
       });
-      
+
       // Refresh user list if on manage users page
       if (activeSection === 'Manage Users') {
         const usersResponse = await axiosInstance.get('http://localhost:5000/api/admin/users', {
@@ -252,27 +255,19 @@ const DashAdmin = () => {
   const handleUpdateComplaintStatus = async (e) => {
     e.preventDefault(); // Prevent form submission refresh
     if (!selectedComplaint) return;
-    
+
     setLoading(true);
     setUpdateError('');
-
-    // Log the data we're about to send
-    console.log("Updating complaint:", selectedComplaint._id);
-    console.log("New status:", complaintStatus);
-    console.log("Admin response:", complaintResponse);
 
     try {
       const requestData = { 
         status: complaintStatus 
       };
-      
-      // Only include adminResponse if it has content
+
       if (complaintResponse.trim()) {
         requestData.adminResponse = complaintResponse;
       }
-      
-      console.log("Request data:", requestData);
-      
+
       const response = await axiosInstance.put(
         `http://localhost:5000/api/admin/complaints/${selectedComplaint._id}`,
         requestData,
@@ -284,10 +279,7 @@ const DashAdmin = () => {
         }
       );
 
-      console.log("Update response:", response);
-
       if (response.status === 200) {
-        // Refresh complaints from server instead of updating locally
         await fetchComplaints();
         setIsComplaintModalOpen(false);
         alert('Complaint status updated successfully');
@@ -312,29 +304,26 @@ const DashAdmin = () => {
     { title: 'Manage Users' },
     { title: 'Register User' },
     { title: 'Manage Complaints' },
-    { title: 'Reports and Analytics' }, // Added Reports section
+    { title: 'Reports and Analytics' },
   ];
 
-  // Fixed filtering of complaints based on status - ensure case insensitive comparison
+  // Fixed filtering of complaints based on status
   const getFilteredComplaints = () => {
-    // First check if there are any complaints to filter
     if (!complaints || complaints.length === 0) {
       return { activeComplaints: [], resolvedComplaints: [] };
     }
-    
-    // Filter with case-insensitive check
+
     const resolvedComplaints = complaints.filter(complaint => 
       complaint.status && complaint.status.toLowerCase() === 'resolved'
     );
-    
+
     const activeComplaints = complaints.filter(complaint => 
       !complaint.status || complaint.status.toLowerCase() !== 'resolved'
     );
-    
+
     return { activeComplaints, resolvedComplaints };
   };
-  
-  // Get filtered complaints based on current tab
+
   const { activeComplaints, resolvedComplaints } = getFilteredComplaints();
 
   const renderContent = () => {
@@ -342,18 +331,19 @@ const DashAdmin = () => {
       case 'Manage Users':
         return (
           <div className="relative z-0 pt-32 px-6 py-8">
-            <h1 className="text-4xl font-bold text-center text-white mb-8">
+            <h1 className="text-4xl font-bold text-center text-green-700 mb-8">
               Manage Users
             </h1>
-            <p className="text-center text-lg text-gray-200">
+            <p className="text-center text-lg text-gray-600">
               View and manage all registered users on the platform.
             </p>
 
             <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {users.map(user => (
-                <div
+                <motion.div
                   key={user._id}
                   className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+                  whileHover={{ scale: 1.02 }}
                 >
                   <h2 className="text-xl font-semibold text-green-700">
                     {user.username}
@@ -378,15 +368,19 @@ const DashAdmin = () => {
                       Delete
                     </button>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
 
             {/* Modal for Editing User */}
             {isModalOpen && selectedUser && (
               <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-                <div className="bg-white p-6 rounded-lg shadow-lg">
-                  <h2 className="text-xl font-semibold mb-4">Edit User</h2>
+                <motion.div
+                  className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                >
+                  <h2 className="text-xl font-semibold mb-4 text-green-700">Edit User</h2>
                   <form>
                     <div className="mb-4">
                       <label className="block text-gray-700">Username</label>
@@ -428,21 +422,21 @@ const DashAdmin = () => {
                     <div className="mt-4 flex justify-between">
                       <button
                         type="button"
-                        className="bg-red-600 text-white p-2 rounded-md"
+                        className="bg-red-600 text-white p-2 rounded-md hover:bg-red-700 transition-all"
                         onClick={() => setIsModalOpen(false)}
                       >
                         Cancel
                       </button>
                       <button
                         type="button"
-                        className="bg-green-600 text-white p-2 rounded-md"
+                        className="bg-green-600 text-white p-2 rounded-md hover:bg-green-700 transition-all"
                         onClick={handleSaveChanges}
                       >
                         {loading ? 'Saving...' : 'Save Changes'}
                       </button>
                     </div>
                   </form>
-                </div>
+                </motion.div>
               </div>
             )}
           </div>
@@ -450,7 +444,7 @@ const DashAdmin = () => {
       case 'Register User':
         return (
           <div className="relative z-0 pt-32 px-6 py-8">
-            <h1 className="text-4xl font-bold text-center text-white mb-8">
+            <h1 className="text-4xl font-bold text-center text-green-700 mb-8">
               Register New User
             </h1>
 
@@ -523,10 +517,10 @@ const DashAdmin = () => {
       case 'Manage Complaints':
         return (
           <div className="relative z-0 pt-32 px-6 py-8">
-            <h1 className="text-4xl font-bold text-center text-white mb-8">
+            <h1 className="text-4xl font-bold text-center text-green-700 mb-8">
               Manage Complaints
             </h1>
-            <p className="text-center text-lg text-gray-200">
+            <p className="text-center text-lg text-gray-600">
               View and manage all complaints submitted by users.
             </p>
 
@@ -571,9 +565,10 @@ const DashAdmin = () => {
               ) : (
                 <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                   {activeComplaints.map(complaint => (
-                    <div
+                    <motion.div
                       key={complaint._id}
                       className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+                      whileHover={{ scale: 1.02 }}
                     >
                       <div className="flex justify-between items-start">
                         <h2 className="text-xl font-semibold text-green-700">
@@ -632,7 +627,7 @@ const DashAdmin = () => {
                           Update Status
                         </button>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               )
@@ -647,9 +642,10 @@ const DashAdmin = () => {
               ) : (
                 <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                   {resolvedComplaints.map(complaint => (
-                    <div
+                    <motion.div
                       key={complaint._id}
                       className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+                      whileHover={{ scale: 1.02 }}
                     >
                       <div className="flex justify-between items-start">
                         <h2 className="text-xl font-semibold text-green-700">
@@ -705,7 +701,7 @@ const DashAdmin = () => {
                           View Details
                         </button>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               )
@@ -714,8 +710,12 @@ const DashAdmin = () => {
             {/* Modal for Updating Complaint Status */}
             {isComplaintModalOpen && selectedComplaint && (
               <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-                <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-                  <h2 className="text-xl font-semibold mb-4 text-gray-800">Update Complaint Status</h2>
+                <motion.div
+                  className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                >
+                  <h2 className="text-xl font-semibold mb-4 text-green-700">Update Complaint Status</h2>
                   
                   <div className="mb-4">
                     <h3 className="font-medium text-gray-700">Complaint Details</h3>
@@ -761,7 +761,7 @@ const DashAdmin = () => {
                     <div className="mt-6 flex justify-between">
                       <button
                         type="button"
-                        className="bg-red-600 text-white p-2 rounded-md"
+                        className="bg-red-600 text-white p-2 rounded-md hover:bg-red-700 transition-all"
                         onClick={() => {
                           setIsComplaintModalOpen(false);
                           setUpdateError('');
@@ -771,61 +771,61 @@ const DashAdmin = () => {
                       </button>
                       <button
                         type="submit"
-                        className="bg-green-600 text-white p-2 rounded-md"
+                        className="bg-green-600 text-white p-2 rounded-md hover:bg-green-700 transition-all"
                         disabled={loading}
                       >
                         {loading ? 'Updating...' : 'Update Status'}
                       </button>
                     </div>
                   </form>
-                </div>
+                </motion.div>
               </div>
             )}
           </div>
         );
-        case 'Reports and Analytics':
-          return (
-            <div className="relative z-0 pt-32 px-6 py-8">
-              <h1 className="text-4xl font-bold text-center text-white mb-8">
-                Reports and Analytics
-              </h1>
-              <p className="text-center text-lg text-gray-200">
-                View and analyze data across the platform.
-              </p>
-        
-              {/* Report Type Filter */}
-              <div className="flex justify-center mt-8">
-                <div className="bg-white p-4 rounded-md w-full max-w-md">
-                  <label className="block text-green-700 font-medium mb-2">
-                    Select Report Type:
-                  </label>
-                  <select
-  value={selectedReportType}
-  onChange={(e) => {
-    const type = e.target.value;
-    setSelectedReportType(type);
-    if (type === "All") {
-      fetchAllReports();
-    } else {
-      const reportEndpoints = {
-        "User Engagement": "user-engagement",
-        "Web Analytics": "web-analytics",
-        "Sales and Revenue": "sales-report",
-      };
-      fetchReportByType(reportEndpoints[type]);
-    }
-  }}
-  className="w-full p-2 border border-gray-300 rounded-md text-black"
->
-  <option value="All">All Reports</option>
-  <option value="User Engagement">User Engagement</option>
-  <option value="Web Analytics">Web Analytics</option>
-  <option value="Sales and Revenue">Sales and Revenue</option>
-</select>
+      case 'Reports and Analytics':
+        return (
+          <div className="relative z-0 pt-32 px-6 py-8">
+            <h1 className="text-4xl font-bold text-center text-green-700 mb-8">
+              Reports and Analytics
+            </h1>
+            <p className="text-center text-lg text-gray-600">
+              View and analyze data across the platform.
+            </p>
 
-                </div>
+            {/* Report Type Filter */}
+            <div className="flex justify-center mt-8">
+              <div className="bg-white p-4 rounded-md w-full max-w-md">
+                <label className="block text-green-700 font-medium mb-2">
+                  Select Report Type:
+                </label>
+                <select
+                  value={selectedReportType}
+                  onChange={(e) => {
+                    const type = e.target.value;
+                    setSelectedReportType(type);
+                    if (type === "All") {
+                      fetchAllReports();
+                    } else {
+                      const reportEndpoints = {
+                        "User Engagement": "user-engagement",
+                        "Web Analytics": "web-analytics",
+                        "Sales and Revenue": "sales-report",
+                      };
+                      fetchReportByType(reportEndpoints[type]);
+                    }
+                  }}
+                  className="w-full p-2 border border-gray-300 rounded-md text-black"
+                >
+                  <option value="All">All Reports</option>
+                  <option value="User Engagement">User Engagement</option>
+                  <option value="Web Analytics">Web Analytics</option>
+                  <option value="Sales and Revenue">Sales and Revenue</option>
+                </select>
               </div>
-              <div className="flex justify-center mt-8">
+            </div>
+
+            <div className="flex justify-center mt-8">
               <button
                 onClick={() => navigate('/reports')} // Redirect to /reports
                 className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition"
@@ -834,53 +834,34 @@ const DashAdmin = () => {
               </button>
             </div>
 
-        
-              {/* Reports Content */}
-              {Object.values(reportsLoading).some((isLoading) => isLoading) ? (
-                <div className="flex justify-center mt-8">
-                  <div className="bg-white p-4 rounded-md">
-                    <p className="text-green-700">Loading reports...</p>
-                  </div>
+            {/* Reports Content */}
+            {Object.values(reportsLoading).some((isLoading) => isLoading) ? (
+              <div className="flex justify-center mt-8">
+                <div className="bg-white p-4 rounded-md">
+                  <p className="text-green-700">Loading reports...</p>
                 </div>
-              ) : Object.keys(reports).length === 0 ? (
-                <div className="flex justify-center mt-8">
-                  <div className="bg-white p-4 rounded-md">
-                    <p className="text-green-700">No reports found.</p>
-                  </div>
+              </div>
+            ) : Object.keys(reports).length === 0 ? (
+              <div className="flex justify-center mt-8">
+                <div className="bg-white p-4 rounded-md">
+                  <p className="text-green-700">No reports found.</p>
                 </div>
-              ) : (
-                <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {/* Render only the selected report type */}
-                  {selectedReportType === "All"
-                    ? Object.entries(reports).map(([type, data], index) =>
-                        data && Object.keys(data).length > 0 ? (
-                          <div
-                            key={index}
-                            className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
-                          >
-                            <h2 className="text-xl font-semibold text-green-700 capitalize">
-                              {type.replace(/([A-Z])/g, ' $1').trim()}
-                            </h2>
-                            <div className="mt-4">
-                              {Object.entries(data).map(([key, value]) => (
-                                <div key={key} className="mt-2">
-                                  <span className="font-medium text-gray-700">{key}: </span>
-                                  <span className="text-gray-600">
-                                    {typeof value === 'object' ? JSON.stringify(value) : value}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        ) : null
-                      )
-                    : reports[selectedReportType] && Object.keys(reports[selectedReportType]).length > 0 ? (
-                        <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+              </div>
+            ) : (
+              <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Render only the selected report type */}
+                {selectedReportType === "All"
+                  ? Object.entries(reports).map(([type, data], index) =>
+                      data && Object.keys(data).length > 0 ? (
+                        <div
+                          key={index}
+                          className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+                        >
                           <h2 className="text-xl font-semibold text-green-700 capitalize">
-                            {selectedReportType.replace(/([A-Z])/g, ' $1').trim()}
+                            {type.replace(/([A-Z])/g, ' $1').trim()}
                           </h2>
                           <div className="mt-4">
-                            {Object.entries(reports[selectedReportType]).map(([key, value]) => (
+                            {Object.entries(data).map(([key, value]) => (
                               <div key={key} className="mt-2">
                                 <span className="font-medium text-gray-700">{key}: </span>
                                 <span className="text-gray-600">
@@ -890,46 +871,65 @@ const DashAdmin = () => {
                             ))}
                           </div>
                         </div>
-                      ) : (
-                        <div className="flex justify-center mt-8">
-                          <div className="bg-white p-4 rounded-md">
-                            <p className="text-green-700">No data available for this report.</p>
-                          </div>
+                      ) : null
+                    )
+                  : reports[selectedReportType] && Object.keys(reports[selectedReportType]).length > 0 ? (
+                      <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                        <h2 className="text-xl font-semibold text-green-700 capitalize">
+                          {selectedReportType.replace(/([A-Z])/g, ' $1').trim()}
+                        </h2>
+                        <div className="mt-4">
+                          {Object.entries(reports[selectedReportType]).map(([key, value]) => (
+                            <div key={key} className="mt-2">
+                              <span className="font-medium text-gray-700">{key}: </span>
+                              <span className="text-gray-600">
+                                {typeof value === 'object' ? JSON.stringify(value) : value}
+                              </span>
+                            </div>
+                          ))}
                         </div>
-                      )}
-                </div>
-              )}
-            </div>
-          );
-        
-        default:
-          return null;        
-        
+                      </div>
+                    ) : (
+                      <div className="flex justify-center mt-8">
+                        <div className="bg-white p-4 rounded-md">
+                          <p className="text-green-700">No data available for this report.</p>
+                        </div>
+                      </div>
+                    )}
+              </div>
+            )}
+          </div>
+        );
+      default:
+        return null;
     }
   };
+
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-screen bg-gradient-to-br from-green-50 to-green-100">
       {/* Left Sidebar */}
-      <div className="w-64 bg-white shadow-lg fixed top-16 left-0 h-full p-6">
+      <div className="w-64 bg-green-700 shadow-lg fixed top-16 left-0 h-full p-6">
         <ul className="space-y-4">
           {sidebarItems.map((item) => (
-            <li
+            <motion.li
               key={item.title}
               className={`cursor-pointer flex items-center space-x-2 p-2 rounded-lg 
                 ${activeSection === item.title 
-                  ? 'bg-green-600 text-white' 
-                  : 'text-green-700 hover:bg-green-50'
+                  ? 'bg-green-800 text-white' 
+                  : 'text-white hover:bg-green-600'
                 }`}
               onClick={() => setActiveSection(item.title)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               <span>{item.title}</span>
-            </li>
+            </motion.li>
           ))}
         </ul>
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 ml-64 relative overflow-y-auto bg-green-700 text-white">
+      <div className="flex-1 ml-64 relative overflow-y-auto">
         {renderContent()}
       </div>
     </div>

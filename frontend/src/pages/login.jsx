@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axiosInstance from "../utils/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -16,9 +16,20 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   // Initialize Google Auth Provider
   const provider = new GoogleAuthProvider();
+
+  // Handle window resize for responsiveness
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -91,11 +102,13 @@ const Login = () => {
       {/* Login Box */}
       <div className="flex items-center justify-center w-full h-full absolute inset-0 z-10">
         <motion.div
-          className="flex flex-col justify-center items-center p-8 rounded-lg shadow-xl w-full max-w-md space-y-6"
+          className={`flex flex-col justify-center items-center p-8 rounded-lg shadow-xl w-full ${
+            isMobile ? "max-w-xs" : "max-w-md"
+          } space-y-6`} // Removed semi-transparent background
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1 }}
-          style={{ marginTop: "5rem" }} // Added margin to move login box down
+          style={{ marginTop: isMobile ? "2rem" : "5rem" }} // Adjusted margin for mobile
         >
           <motion.h1
             className="text-3xl font-bold text-center text-white mb-6 drop-shadow-sm"

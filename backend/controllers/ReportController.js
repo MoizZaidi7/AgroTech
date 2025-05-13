@@ -1,5 +1,6 @@
 import Report from "../models/Reports.js";
 import User from "../models/User.js";
+import { Server } from 'socket.io';
 
 // Get All Reports
 const getAllReports = async (req, res) => {
@@ -11,54 +12,79 @@ const getAllReports = async (req, res) => {
   }
 };
 
-// User Engagement Report
-const getUserEngagementReport = async (req, res) => {
-  try {
-    const users = await User.find();
-    const totalUsers = users.length;
-    const activeUsers = users.filter(user => user.isActive).length;
-    const loggedInUsers = users.filter(user => user.isLoggedIn).length;
-
-    res.status(200).json({
-      totalUsers,
-      activeUsers,
-      loggedInUsers,
-      engagementRate: ((loggedInUsers / totalUsers) * 100).toFixed(2),
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Error generating engagement report", error });
-  }
-};
-
-// Web Analytics Report (mock data for now)
+// Web Analytics Report (real data)
 const getWebAnalyticsReport = async (req, res) => {
   try {
-    const analytics = {
-      totalVisits: 1056,
-      maxVisitedPage: "/dashboard",
-      averageSessionDuration: "5m 30s",
+    // Get real data from the request (passed by middleware)
+    const analytics = req.app.get('webAnalyticsData') || {
+      totalVisits: 0,
+      maxVisitedPage: "/",
+      averageSessionDuration: "0m 0s",
+      visitTrends: []
     };
+
+    // Emit real-time updates
+    const io = req.app.get('socketio');
+    io.emit('webAnalyticsUpdate', analytics);
+
     res.status(200).json(analytics);
   } catch (error) {
     res.status(500).json({ message: "Error generating web analytics", error });
   }
 };
 
-// Sales Report (mock data, replace with actual sales data fetching logic)
+// User Engagement Report (real data)
+const getUserEngagementReport = async (req, res) => {
+  try {
+    const users = await User.find();
+    const activeUsers = await User.countDocuments({ isActive: true });
+    const loggedInUsers = await User.countDocuments({ isLoggedIn: true });
+    const newUsers = await User.countDocuments({ 
+      createdAt: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } 
+    });
+
+    res.status(200).json({
+      totalUsers: users.length,
+      activeUsers,
+      loggedInUsers,
+      newUsers,
+      engagementRate: ((loggedInUsers / users.length) * 100).toFixed(2),
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error generating engagement report", error });
+  }
+};
+
+// Sales Report (real data - assuming you have Order model)
 const getSalesReport = async (req, res) => {
   try {
-    const salesData = {
-      cropSales: 150,
-      pesticideSales: 75,
-      equipmentRentals: 30,
-      totalRevenue: 12000,
-    };
-    res.status(200).json(salesData);
+    const Order = require('../models/Order'); // Import your Order model
+    
+    const [cropSales, pesticideSales, equipmentRentals] = await Promise.all([
+      Order.countDocuments({ productType: 'crop' }),
+      Order.countDocuments({ productType: 'pesticide' }),
+      Order.countDocuments({ productType: 'equipment' })
+    ]);
+
+    const revenueData = await Order.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: "$amount" }
+        }
+      }
+    ]);
+
+    res.status(200).json({
+      cropSales,
+      pesticideSales,
+      equipmentRentals,
+      totalRevenue: revenueData[0]?.totalRevenue || 0
+    });
   } catch (error) {
     res.status(500).json({ message: "Error generating sales report", error });
   }
 };
-
 // Export all functions
 export {
   getAllReports,

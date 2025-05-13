@@ -7,8 +7,12 @@ import {
 } from "../controllers/ReportController.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import authorize from "../middleware/authorize.js";
+import { updateLastActivity } from "../middleware/lastactivity.js";
+import { checkInactivity } from "../middleware/inactivity.js";
 
 const ReportRouter = express.Router();
+
+ReportRouter.use(updateLastActivity);
 
 // Protect all routes with auth and admin authorization
 ReportRouter.use(authMiddleware, authorize(['Admin']));

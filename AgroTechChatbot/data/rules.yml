@@ -150,7 +150,6 @@ rules:
     steps:
       - intent: faq_crop_yield_factors
       - action: utter_faq_crop_yield_factors
-
   - rule: Answer water usage reduction question
     steps:
       - intent: faq_reduce_water_usage

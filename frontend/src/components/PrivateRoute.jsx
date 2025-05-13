@@ -22,7 +22,7 @@ const PrivateRoute = ({ children, roles }) => {
     if (user?.userType === 'Admin') {
       return <Navigate to="/dashboardadmin" replace />;
     } else if (user?.userType === 'Farmer') {
-      return <Navigate to="/dashboarfarmer" replace />;
+      return <Navigate to="/dashboardfarmer" replace />;
     } else if (user?.userType === 'Customer') {
       return <Navigate to="/dashboardcustomer" replace />;
     } else if (user?.userType === 'Seller') {

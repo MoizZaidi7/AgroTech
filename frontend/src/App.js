@@ -17,6 +17,7 @@ import ReportsPage from "./pages/Reports.jsx";
 import Header from "./components/Header.jsx";
 import DashHeader from "./components/DashHeader.jsx";
 import { ChatbotWidget } from "./components/ChatBotWidget";
+import MarketPlace from "./pages/Marketplace.jsx";
 
 const AppRoutes = () => {
   return (
@@ -27,6 +28,7 @@ const AppRoutes = () => {
       <Route path="/register" element={<><Header /><Register /></>} />
       <Route path="/forgotPassword" element={<><Header /><ForgotPassword /></>} />
       <Route path="/resetPassword" element={<><Header /><ResetPassword /></>} />
+      <Route path="/marketplace" element={<><MarketPlace /></>} />
 
       {/* Private Routes */}
       <Route path="/dashboardadmin" element={
@@ -34,6 +36,7 @@ const AppRoutes = () => {
           <><DashHeader /><DashAdmin /></>
         </PrivateRoute>
       }/>
+
       <Route path="/dashboardfarmer" element={
         <PrivateRoute roles={["Farmer"]}>
           <><DashHeader /><DashFarmer /></>

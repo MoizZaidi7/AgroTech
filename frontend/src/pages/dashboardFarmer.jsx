@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
-import { FaLeaf, FaChartLine, FaCamera, FaStore, FaArrowLeft, FaArrowRight, FaMapMarkerAlt, FaCheck } from 'react-icons/fa';
+import { FaLeaf, FaChartLine, FaCamera, FaStore, FaArrowLeft, FaArrowRight, FaMapMarkerAlt, FaCheck, FaBox, FaShoppingCart, FaPlus, FaEdit, FaTrash, FaClipboardList } from 'react-icons/fa';
 
 const DashFarmer = () => {
   const [activeSection, setActiveSection] = useState('Crop Recommendation');
@@ -26,6 +26,25 @@ const DashFarmer = () => {
   const [useMap, setUseMap] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // E-commerce State
+  const [products, setProducts] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    description: '',
+    price: '',
+    category: 'Food & Produce',
+    grade: 'A',
+    stock: '',
+    farmingPractices: '',
+    images: []
+  });
+  const [productImages, setProductImages] = useState([]);
+  const [previewImages, setPreviewImages] = useState([]);
+  const [isAddingProduct, setIsAddingProduct] = useState(false);
+  const [isEditingProduct, setIsEditingProduct] = useState(false);
+  const [currentProductId, setCurrentProductId] = useState(null);
+
   // Crop Yield Prediction state
   const [cropYieldData, setCropYieldData] = useState({
     Year: new Date().getFullYear(),
@@ -47,10 +66,22 @@ const DashFarmer = () => {
     { title: 'Crop Recommendation', icon: <FaLeaf /> },
     { title: 'Crop Yield Prediction', icon: <FaChartLine /> },
     { title: 'Crop Health Monitoring', icon: <FaCamera /> },
-    { title: 'Market Insights', icon: <FaStore /> },
+    { title: 'My Products', icon: <FaBox /> },
+    { title: 'Orders', icon: <FaShoppingCart /> },
   ];
 
   const crops = ['Wheat', 'Rice', 'Maize', 'Cotton', 'Sugarcane', 'Potato', 'Tomato', 'Onion', 'Mango', 'Citrus'];
+
+    const productCategories = [
+    'Food & Produce',
+    'Farm Inputs',
+    'Equipment',
+    'Seeds',
+    'Fertilizers',
+    'Livestock',
+    'Dairy'
+  ];
+
 
   // Map configuration
   const mapContainerStyle = {
@@ -79,6 +110,13 @@ const DashFarmer = () => {
       setError('');
       setLoading(false);
       setLoadingStep(null);
+    }
+  }, [activeSection]);
+
+   useEffect(() => {
+    if (activeSection === 'My Products' || activeSection === 'Orders') {
+      fetchFarmerProducts();
+      fetchFarmerOrders();
     }
   }, [activeSection]);
 
@@ -261,7 +299,7 @@ const DashFarmer = () => {
           name={name}
           value={value}
           onChange={onChange}
-          className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50 transition-all"
+          className="w-full p-3 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-white/80 backdrop-blur-sm"
         >
           <option value="">Select {label}</option>
           {options.map((option) => (
@@ -279,7 +317,7 @@ const DashFarmer = () => {
           min={min}
           max={max}
           placeholder={placeholder || `Enter ${label}`}
-          className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50 transition-all"
+          className="w-full p-3 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-white/80 backdrop-blur-sm"
           required
         />
       )}
@@ -290,6 +328,173 @@ const DashFarmer = () => {
       )}
     </div>
   );
+
+  const fetchFarmerProducts = async () => {
+    try {
+      // Replace with your actual API endpoint
+      const response = await axios.get('http://localhost:5000/api/farmer/products/my-products', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      setProducts(response.data);
+    } catch (error) {
+      setError('Failed to fetch products');
+    }
+  };
+
+  const fetchFarmerOrders = async () => {
+    try {
+      // Replace with your actual API endpoint
+      const response = await axios.get('http://localhost:5000/api/farmer/orders/farmer-orders', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      setOrders(response.data);
+    } catch (error) {
+      setError('Failed to fetch orders');
+    }
+  };
+
+  // Handle image selection for product listing
+  const handleProductImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setProductImages(files);
+    
+    const previews = files.map(file => URL.createObjectURL(file));
+    setPreviewImages(previews);
+  };
+
+  // Create new product listing
+  const handleCreateProduct = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    const formData = new FormData();
+    formData.append('name', newProduct.name);
+    formData.append('description', newProduct.description);
+    formData.append('price', newProduct.price);
+    formData.append('category', newProduct.category);
+    formData.append('grade', newProduct.grade);
+    formData.append('stock', newProduct.stock);
+    formData.append('farmingPractices', newProduct.farmingPractices);
+    productImages.forEach((image, index) => {
+      formData.append(`images`, image);
+    });
+
+    try {
+      const response = await axios.post('http://localhost:5000/api/farmer/products', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      setProducts([...products, response.data]);
+      resetProductForm();
+      setIsAddingProduct(false);
+    } catch (error) {
+      setError(error.response?.data?.message || 'Failed to create product');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update product listing
+  const handleUpdateProduct = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    const formData = new FormData();
+    formData.append('name', newProduct.name);
+    formData.append('description', newProduct.description);
+    formData.append('price', newProduct.price);
+    formData.append('category', newProduct.category);
+    formData.append('grade', newProduct.grade);
+    formData.append('stock', newProduct.stock);
+    formData.append('farmingPractices', newProduct.farmingPractices);
+    productImages.forEach((image, index) => {
+      formData.append(`images`, image);
+    });
+
+    try {
+      const response = await axios.put(`http://localhost:5000/api/farmer/products/${currentProductId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      setProducts(products.map(p => p._id === currentProductId ? response.data : p));
+      resetProductForm();
+      setIsEditingProduct(false);
+    } catch (error) {
+      setError(error.response?.data?.message || 'Failed to update product');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Delete product listing
+  const handleDeleteProduct = async (productId) => {
+    if (window.confirm('Are you sure you want to delete this product?')) {
+      try {
+        await axios.delete(`http://localhost:5000/api/farmer/products/${productId}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setProducts(products.filter(p => p._id !== productId));
+      } catch (error) {
+        setError('Failed to delete product');
+      }
+    }
+  };
+
+  // Edit product - populate form
+  const handleEditProduct = (product) => {
+    setNewProduct({
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      category: product.category,
+      grade: product.grade,
+      stock: product.stock,
+      farmingPractices: product.farmingPractices,
+      images: product.images
+    });
+    setPreviewImages(product.images);
+    setCurrentProductId(product._id);
+    setIsEditingProduct(true);
+    setIsAddingProduct(true);
+  };
+
+  // Reset product form
+  const resetProductForm = () => {
+    setNewProduct({
+      name: '',
+      description: '',
+      price: '',
+      category: 'Food & Produce',
+      grade: 'A',
+      stock: '',
+      farmingPractices: '',
+      images: []
+    });
+    setProductImages([]);
+    setPreviewImages([]);
+    setCurrentProductId(null);
+  };
+
+  // Update order status
+  const updateOrderStatus = async (orderId, status) => {
+    try {
+      await axios.put(`http://localhost:5000/api/marketplace/orders/${orderId}`, { status }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      setOrders(orders.map(order => 
+        order._id === orderId ? { ...order, status } : order
+      ));
+    } catch (error) {
+      setError('Failed to update order status');
+    }
+  };
+
 
   const renderStepForm = () => {
     const soilParams = [
@@ -472,7 +677,7 @@ const DashFarmer = () => {
         </p>
       </motion.div>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-xl overflow-hidden">
+      <form onSubmit={handleSubmit} className="bg-white/80 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden p-6 md:p-8">
         <div className="p-6 md:p-8">
           {renderStepIndicator()}
 
@@ -521,7 +726,7 @@ const DashFarmer = () => {
               <button
                 type="button"
                 onClick={handlePrevStep}
-                className="flex items-center px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                className="flex items-center px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all shadow-lg hover:shadow-xl"
               >
                 <FaArrowLeft className="mr-2" /> Back
               </button>
@@ -533,14 +738,14 @@ const DashFarmer = () => {
               <button
                 type="button"
                 onClick={handleNextStep}
-                className="flex items-center px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition ml-auto"
+                className="flex items-center px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all shadow-lg hover:shadow-xl"
               >
                 Next <FaArrowRight className="ml-2" />
               </button>
             ) : (
               <button
                 type="submit"
-                className="flex items-center px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition ml-auto"
+                className="flex items-center px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all shadow-lg hover:shadow-xl"
               >
                 Get Recommendation <FaLeaf className="ml-2" />
               </button>
@@ -567,7 +772,7 @@ const DashFarmer = () => {
 
       <form
         onSubmit={handleCropYieldSubmit}
-        className="bg-white rounded-xl shadow-xl overflow-hidden p-6 md:p-8"
+        className="bg-white/80 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden p-6 md:p-8"
       >
         {error && (
           <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
@@ -622,7 +827,7 @@ const DashFarmer = () => {
 
         <button
           type="submit"
-          className="mt-8 w-full md:w-auto px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center justify-center"
+          className="mt-8 w-full md:w-auto px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all shadow-lg hover:shadow-xl"
         >
           <FaChartLine className="mr-2" /> Predict Yield
         </button>
@@ -663,7 +868,7 @@ const DashFarmer = () => {
 
       <form
         onSubmit={handleHealthImageUpload}
-        className="bg-white rounded-xl shadow-xl overflow-hidden p-6 md:p-8"
+        className="bg-white/80 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden p-6 md:p-8"
       >
         {error && (
           <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
@@ -706,7 +911,7 @@ const DashFarmer = () => {
 
         <button
           type="submit"
-          className="w-full md:w-auto px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center justify-center"
+          className="w-full md:w-auto px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all shadow-lg hover:shadow-xl"
           disabled={!healthImage}
         >
           <FaLeaf className="mr-2" /> Analyze Crop Health
@@ -733,7 +938,7 @@ const DashFarmer = () => {
     </div>
   );
 
-  const renderMarketInsights = () => (
+   const renderProductManagement = () => (
     <div className="p-4 md:p-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -741,19 +946,379 @@ const DashFarmer = () => {
         transition={{ duration: 0.5 }}
         className="mb-8"
       >
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Market Insights</h1>
-        <p className="text-gray-600">
-          Stay updated with current market trends and pricing information.
-        </p>
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-gray-800">My Products</h1>
+          <button
+            onClick={() => {
+              resetProductForm();
+              setIsAddingProduct(true);
+              setIsEditingProduct(false);
+            }}
+            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all"
+          >
+            <FaPlus className="mr-2" /> Add Product
+          </button>
+        </div>
+        <p className="text-gray-600">Manage your agricultural products for sale</p>
       </motion.div>
 
-      <div className="bg-white rounded-xl shadow-xl overflow-hidden p-6 md:p-8 text-center">
-        <FaStore className="text-6xl text-gray-300 mx-auto mb-4" />
-        <h3 className="text-xl font-medium text-gray-700 mb-2">Coming Soon</h3>
-        <p className="text-gray-500">
-          We're working on bringing you the latest market insights. This feature will be available soon!
-        </p>
-      </div>
+      {error && (
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+          <p className="text-red-700">{error}</p>
+        </div>
+      )}
+
+      {isAddingProduct ? (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-white rounded-xl shadow-lg overflow-hidden mb-8"
+        >
+          <div className="p-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
+              {isEditingProduct ? 'Edit Product' : 'Add New Product'}
+            </h2>
+            
+            <form onSubmit={isEditingProduct ? handleUpdateProduct : handleCreateProduct}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="mb-4">
+                  <label className="block text-gray-700 mb-2">Product Name</label>
+                  <input
+                    type="text"
+                    value={newProduct.name}
+                    onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg"
+                    required
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-gray-700 mb-2">Category</label>
+                  <select
+                    value={newProduct.category}
+                    onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg"
+                  >
+                    {productCategories.map(category => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-gray-700 mb-2">Price (PKR)</label>
+                  <input
+                    type="number"
+                    value={newProduct.price}
+                    onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg"
+                    required
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-gray-700 mb-2">Quality Grade</label>
+                  <select
+                    value={newProduct.grade}
+                    onChange={(e) => setNewProduct({...newProduct, grade: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg"
+                  >
+                    <option value="A">Grade A (Premium)</option>
+                    <option value="B">Grade B (Standard)</option>
+                    <option value="C">Grade C (Economy)</option>
+                  </select>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-gray-700 mb-2">Stock Quantity</label>
+                  <input
+                    type="number"
+                    value={newProduct.stock}
+                    onChange={(e) => setNewProduct({...newProduct, stock: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg"
+                    required
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-gray-700 mb-2">Farming Practices</label>
+                  <input
+                    type="text"
+                    value={newProduct.farmingPractices}
+                    onChange={(e) => setNewProduct({...newProduct, farmingPractices: e.target.value})}
+                    placeholder="e.g., Organic, Rainfed"
+                    className="w-full p-3 border border-gray-300 rounded-lg"
+                  />
+                </div>
+
+                <div className="md:col-span-2 mb-4">
+                  <label className="block text-gray-700 mb-2">Description</label>
+                  <textarea
+                    value={newProduct.description}
+                    onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg h-32"
+                    required
+                  />
+                </div>
+
+                <div className="md:col-span-2 mb-4">
+                  <label className="block text-gray-700 mb-2">Product Images</label>
+                  <input
+                    type="file"
+                    multiple
+                    onChange={handleProductImageChange}
+                    className="hidden"
+                    id="productImages"
+                  />
+                  <label
+                    htmlFor="productImages"
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-6 block text-center cursor-pointer hover:bg-gray-50"
+                  >
+                    <FaCamera className="text-3xl text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-600">Click to upload product images</p>
+                    <p className="text-sm text-gray-500 mt-1">Maximum 5 images (JPEG/PNG)</p>
+                  </label>
+
+                  {previewImages.length > 0 && (
+                    <div className="mt-4 flex flex-wrap gap-4">
+                      {previewImages.map((img, index) => (
+                        <div key={index} className="relative w-24 h-24">
+                          <img
+                            src={img}
+                            alt={`Preview ${index}`}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-4 mt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAddingProduct(false);
+                    resetProductForm();
+                  }}
+                  className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex items-center px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      {isEditingProduct ? <FaEdit className="mr-2" /> : <FaPlus className="mr-2" />}
+                      {isEditingProduct ? 'Update Product' : 'Add Product'}
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </motion.div>
+      ) : (
+        <>
+          {products.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+              <FaBox className="text-5xl text-gray-300 mx-auto mb-4" />
+              <h3 className="text-xl font-medium text-gray-700 mb-2">No Products Listed</h3>
+              <p className="text-gray-500 mb-4">You haven't listed any products for sale yet</p>
+              <button
+                onClick={() => setIsAddingProduct(true)}
+                className="flex items-center mx-auto px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all"
+              >
+                <FaPlus className="mr-2" /> Add Your First Product
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {products.map(product => (
+                <motion.div
+                  key={product._id}
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-white rounded-xl shadow-lg overflow-hidden"
+                >
+                  <div className="relative h-48 bg-gray-100">
+                    {product.images.length > 0 ? (
+                      <img
+                        src={product.images[0]}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        <FaBox className="text-4xl" />
+                      </div>
+                    )}
+                    <div className="absolute top-2 right-2 bg-green-600 text-white text-xs font-bold px-2 py-1 rounded">
+                      {product.grade}
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-lg font-bold text-gray-800">{product.name}</h3>
+                      <span className="text-green-600 font-bold">PKR {product.price}</span>
+                    </div>
+                    <p className="text-gray-600 text-sm mb-3">{product.category}</p>
+                    <p className="text-gray-700 text-sm mb-4 line-clamp-2">{product.description}</p>
+                    
+                    <div className="flex justify-between items-center mb-4">
+                      <div>
+                        <span className="text-sm text-gray-500">Stock:</span>
+                        <span className="ml-2 font-medium">{product.stock} units</span>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {product.farmingPractices || 'Conventional'}
+                      </div>
+                    </div>
+
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleEditProduct(product)}
+                        className="flex-1 flex items-center justify-center py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
+                      >
+                        <FaEdit className="mr-2" /> Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteProduct(product._id)}
+                        className="flex-1 flex items-center justify-center py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all"
+                      >
+                        <FaTrash className="mr-2" /> Delete
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+
+  // Render Order Management Section
+  const renderOrderManagement = () => (
+    <div className="p-4 md:p-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mb-8"
+      >
+        <h1 className="text-3xl font-bold text-gray-800">Orders</h1>
+        <p className="text-gray-600">Manage customer orders for your products</p>
+      </motion.div>
+
+      {error && (
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+          <p className="text-red-700">{error}</p>
+        </div>
+      )}
+
+      {orders.length === 0 ? (
+        <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+          <FaClipboardList className="text-5xl text-gray-300 mx-auto mb-4" />
+          <h3 className="text-xl font-medium text-gray-700 mb-2">No Orders Yet</h3>
+          <p className="text-gray-500">You haven't received any orders for your products</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {orders.map(order => (
+                  <tr key={order._id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      #{order._id.slice(-6).toUpperCase()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-10 w-10">
+                          <img className="h-10 w-10 rounded-full object-cover" src={order.productId.images[0]} alt={order.productId.name} />
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">{order.productId.name}</div>
+                          <div className="text-sm text-gray-500">{order.productId.category}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {order.buyerId.name || 'Anonymous'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {order.quantity}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      PKR {order.totalPrice}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        order.status === 'paid' ? 'bg-blue-100 text-blue-800' :
+                        order.status === 'shipped' ? 'bg-indigo-100 text-indigo-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {order.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      {order.status === 'pending' && (
+                        <button
+                          onClick={() => updateOrderStatus(order._id, 'paid')}
+                          className="text-blue-600 hover:text-blue-900 mr-3"
+                        >
+                          Mark as Paid
+                        </button>
+                      )}
+                      {order.status === 'paid' && (
+                        <button
+                          onClick={() => updateOrderStatus(order._id, 'shipped')}
+                          className="text-indigo-600 hover:text-indigo-900 mr-3"
+                        >
+                          Ship Order
+                        </button>
+                      )}
+                      {order.status === 'shipped' && (
+                        <button
+                          onClick={() => updateOrderStatus(order._id, 'delivered')}
+                          className="text-green-600 hover:text-green-900"
+                        >
+                          Mark Delivered
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -765,25 +1330,31 @@ const DashFarmer = () => {
         return renderCropYieldPrediction();
       case 'Crop Health Monitoring':
         return renderCropHealthMonitoring();
-      case 'Market Insights':
-        return renderMarketInsights();
+      case 'My Products':
+        return renderProductManagement();
+      case 'Orders':
+        return renderOrderManagement();
       default:
         return null;
     }
   };
 
   return (
-    <div className="flex min-h-screen bg-white">
-      <div className="w-64 bg-gray-100 p-6 sidebar-container" style={{ marginTop: '50px' }}>
+    <div className="flex min-h-screen bg-gradient-to-br from-green-50 to-green-100">
+      <div className="w-64 bg-green-800 p-6 sidebar-container" style={{ marginTop: '50px' }}>
         <ul>
           {sidebarItems.map((item) => (
-            <li
+            <motion.li
               key={item.title}
               onClick={() => setActiveSection(item.title)}
-              className={`p-4 cursor-pointer ${activeSection === item.title ? 'bg-green-500 text-white' : 'text-gray-800'}`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`p-4 cursor-pointer text-lg font-medium ${
+                activeSection === item.title ? 'bg-green-700 text-white' : 'text-green-100 hover:bg-green-700'
+              } rounded-lg transition-all`}
             >
-              {item.title}
-            </li>
+              {item.icon} {item.title}
+            </motion.li>
           ))}
         </ul>
       </div>

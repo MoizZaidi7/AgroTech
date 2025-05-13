@@ -26,13 +26,15 @@ const ChatbotWidget = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Toggle chatbot popup
   const toggleChatbot = () => {
     setIsOpen(!isOpen);
     setIsComplaintMode(false);
     setShowComplaintForm(false);
-    setComplaints([]);
+    setComplaints([]); // Clear complaints when closing the chatbot
   };
 
+  // Open chatbot in a new window
   const openChatbotWindow = () => {
     if (!chatWindowRef.current || chatWindowRef.current.closed) {
       chatWindowRef.current = window.open("/chatbot", "Chatbot", "width=400,height=600");
@@ -42,6 +44,7 @@ const ChatbotWidget = () => {
     }
   };
 
+  // Handle user message (only for Query Section)
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -52,9 +55,10 @@ const ChatbotWidget = () => {
     setIsLoading(true);
 
     try {
+      // Directly specify the Rasa server URL
       const response = await axios.post(
-        "http://localhost:5002/webhooks/rest/webhook",
-        { sender: "user", message: input }
+        "http://localhost:5002/webhooks/rest/webhook", // Replace with your Rasa server URL
+        { sender: "user", message: input } // Ensure the payload matches Rasa's expected format
       );
 
       if (response.data.length > 0) {
@@ -82,9 +86,11 @@ const ChatbotWidget = () => {
       return;
     }
 
+    console.log("Submitting complaint:", complaintDetails); // Debugging Step
+
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/users/complaints/create",
+        "http://localhost:5000/api/users/complaints/create", // Replace with your backend URL
         complaintDetails,
         {
           headers: {
@@ -108,11 +114,12 @@ const ChatbotWidget = () => {
     }
   };
 
+  // Handle tracking complaint
   const trackComplaint = async () => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/users/complaints",
+        "http://localhost:5000/api/users/complaints", // Replace with your backend URL
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -280,28 +287,14 @@ const ChatbotWidget = () => {
               )}
 
               {complaints.length > 0 && (
-                <div>
-                  <h4 className="font-semibold text-sm text-gray-700 mb-2">Complaint History</h4>
+                <div className="mt-4">
+                  <h3 className="text-lg font-semibold mb-2">Your Complaints</h3>
                   <ul className="space-y-2">
-                    {complaints.map((complaint) => (
-                      <li key={complaint.id} className="p-2 bg-gray-100 rounded-md text-sm">
-                        <div className="font-medium text-gray-800">{complaint.name}</div>
-                        <div className="text-gray-600">{complaint.type}</div>
-                        <div className="text-xs text-gray-500">{complaint.details}</div>
-                        <div className="mt-1">
-                          <span className="text-xs font-medium text-gray-700">Status:</span>
-                          <span
-                            className={`ml-1 text-xs ${
-                              complaint.status === "Resolved"
-                                ? "text-green-600"
-                                : complaint.status === "In Progress"
-                                ? "text-yellow-600"
-                                : "text-red-600"
-                            }`}
-                          >
-                            {complaint.status || "Pending"}
-                          </span>
-                        </div>
+                    {complaints.map((complaint, index) => (
+                      <li key={index} className="p-2 bg-gray-100 rounded-md">
+                        <p><strong>Name:</strong> {complaint.name}</p>
+                        <p><strong>Type:</strong> {complaint.type}</p>
+                        <p><strong>Status:</strong> {complaint.status}</p>
                       </li>
                     ))}
                   </ul>

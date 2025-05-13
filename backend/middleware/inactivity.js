@@ -1,20 +1,40 @@
-import User from '../models/User.js';
+import User from '../models/User.js';  // Import the User model
+
+const INACTIVITY_LIMIT = 1 * 60 * 1000; // 2 minutes in milliseconds
 
 const checkInactivity = async (req, res, next) => {
-  if (req.user) {
-    const user = await User.findById(req.user._id);
+  try {
+    // Get the user ID from the request (assuming it's attached to req.user by authMiddleware)
+    const userId = req.user.id;
 
-    const inactivityLimit = 1 * 60 * 1000; // 1 minute in milliseconds
-    const currentTime = Date.now();
-    const lastActivityTime = user.lastActivity.getTime();
+    // Fetch the user from the database
+    const user = await User.findById(userId);
 
-    if (currentTime - lastActivityTime > inactivityLimit) {
-      // If the user has been inactive for more than 1 minute, log them out
-      req.logout();  // Assuming you're using a session-based authentication strategy
-      return res.status(401).json({ message: "You have been logged out due to inactivity." });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
+
+    // Get the current time and the user's last activity time
+    const currentTime = new Date().getTime();
+    const lastActivityTime = new Date(user.lastActivity).getTime();
+
+    // Calculate the inactivity duration
+    const inactivityDuration = currentTime - lastActivityTime;
+
+    if (inactivityDuration > INACTIVITY_LIMIT) {
+      // If the user has been inactive for more than the limit, log them out
+      user.isLoggedIn = false;
+      await user.save();  // Save the updated user status
+
+      return res.status(401).json({ message: 'Session expired due to inactivity' });
+    }
+
+    // If the user is still active, continue to the next middleware or route handler
+    next();
+  } catch (error) {
+    console.error('Error checking inactivity:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
-  next();
 };
 
 export { checkInactivity };
